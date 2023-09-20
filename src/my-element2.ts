@@ -18,11 +18,21 @@ export class MyElement2 extends LitElement {
 
   @state() viewportPadding = 50;
   @state() imageScale = 1;
+  @state() maxScaleFactor = 4;
 
+  private maxScale = 0;
   private minScale = 0;
   private isDragging = false;
   private offsetX = 0;
   private offsetY = 0;
+
+  /* change event props
+  crop size
+  image original size
+  image position
+  new image scale
+
+  */
 
   connectedCallback() {
     super.connectedCallback();
@@ -41,12 +51,14 @@ export class MyElement2 extends LitElement {
     this.addEventListener("mousemove", this.onDrag.bind(this));
     this.addEventListener("mouseup", this.onEndDrag.bind(this));
     window.addEventListener("keydown", this.onKeyDown.bind(this));
+    this.addEventListener("wheel", this.onWheel.bind(this));
   }
 
   private removeEventListeners() {
     this.image.removeEventListener("mousedown", this.onStartDrag.bind(this));
     this.removeEventListener("mousemove", this.onDrag.bind(this));
     this.removeEventListener("mouseup", this.onEndDrag.bind(this));
+    this.removeEventListener("wheel", this.onWheel.bind(this));
     window.removeEventListener("keydown", this.onKeyDown.bind(this));
   }
 
@@ -61,18 +73,8 @@ export class MyElement2 extends LitElement {
 
   private onDrag(event: MouseEvent) {
     if (this.isDragging) {
-      // const viewportRect = this.viewport.getBoundingClientRect();
-      // const leftEdge = viewportRect.left + this.viewportPadding;
-      // const topEdge = viewportRect.top + this.viewportPadding;
-      // const rightEdge = viewportRect.right - this.image.clientWidth - this.viewportPadding;
-      // const bottomEdge = viewportRect.bottom - this.image.clientHeight - this.viewportPadding;
-
       let newLeft = event.clientX - this.offsetX;
       let newTop = event.clientY - this.offsetY;
-
-      // Ensure the image stays within the viewport boundaries
-      // newLeft = Math.max(leftEdge, Math.min(newLeft, rightEdge));
-      // newTop = Math.max(topEdge, Math.min(newTop, bottomEdge));
 
       this.image.style.left = `${newLeft}px`;
       this.image.style.top = `${newTop}px`;
@@ -81,6 +83,11 @@ export class MyElement2 extends LitElement {
 
   private onEndDrag() {
     this.isDragging = false;
+  }
+
+  private onWheel(event: WheelEvent) {
+    event.preventDefault();
+    this.#updateImageScale(event.deltaY * -0.001);
   }
 
   private onKeyDown(event: KeyboardEvent) {
@@ -128,6 +135,7 @@ export class MyElement2 extends LitElement {
     const scaleY = maskHeight / this.image.naturalHeight;
     this.imageScale = Math.max(scaleX, scaleY);
     this.minScale = this.imageScale;
+    this.maxScale = this.imageScale * this.maxScaleFactor;
 
     // Set the image size to fill the mask while preserving aspect ratio
     const imageWidth = this.image.naturalWidth * this.minScale;
@@ -148,9 +156,10 @@ export class MyElement2 extends LitElement {
     const imageRect = this.image.getBoundingClientRect();
 
     // Calculate the new zoom factor
-    const newScale = Math.max(this.minScale, this.imageScale + amount);
+    const newScale = this.#clamp(this.imageScale + amount * (this.imageScale * this.imageScale), this.minScale, this.maxScale);
 
     const fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
+    //TODO: Use mouse position instead of center of mask with scroll
     const imageLocation = this.#toLocalPosition(imageRect.left, imageRect.top);
 
     // Calculate the new image position to keep the center of the mask fixed
@@ -158,6 +167,10 @@ export class MyElement2 extends LitElement {
     const imageTop = fixedLocation.y - (fixedLocation.y - imageLocation.y) * (newScale / this.imageScale);
 
     this.imageScale = newScale;
+
+    console.clear();
+    console.log("image scale", this.imageScale);
+
     this.image.style.width = `${this.image.naturalWidth * this.imageScale}px`;
     this.image.style.height = `${this.image.naturalHeight * this.imageScale}px`;
     this.image.style.left = `${imageLeft}px`;
@@ -171,6 +184,10 @@ export class MyElement2 extends LitElement {
       x: x - viewportRect.left,
       y: y - viewportRect.top,
     };
+  }
+
+  #clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
   }
 
   render() {
