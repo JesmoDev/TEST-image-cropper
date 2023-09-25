@@ -87,7 +87,8 @@ export class MyElement2 extends LitElement {
 
   private onWheel(event: WheelEvent) {
     event.preventDefault();
-    this.#updateImageScale(event.deltaY * -0.001);
+
+    this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
   }
 
   private onKeyDown(event: KeyboardEvent) {
@@ -151,7 +152,7 @@ export class MyElement2 extends LitElement {
     this.image.style.top = `${imageTop}px`;
   }
 
-  #updateImageScale(amount: number) {
+  #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {
     const maskRect = this.mask.getBoundingClientRect();
     const imageRect = this.image.getBoundingClientRect();
 
@@ -159,7 +160,13 @@ export class MyElement2 extends LitElement {
     // TODO: How do i make this feel more natural?
     const newScale = this.#clamp(this.imageScale + amount * (this.imageScale * this.imageScale), this.minScale, this.maxScale);
 
-    const fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
+    let fixedLocation = { x: 0, y: 0 };
+
+    if (mouseX && mouseY) {
+      fixedLocation = this.#toLocalPosition(mouseX, mouseY);
+    } else {
+      fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
+    }
     //TODO: Use mouse position instead of center of mask with scroll
     const imageLocation = this.#toLocalPosition(imageRect.left, imageRect.top);
 
