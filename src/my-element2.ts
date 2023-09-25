@@ -156,6 +156,7 @@ export class MyElement2 extends LitElement {
     const imageRect = this.image.getBoundingClientRect();
 
     // Calculate the new zoom factor
+    // TODO: How do i make this feel more natural?
     const newScale = this.#clamp(this.imageScale + amount * (this.imageScale * this.imageScale), this.minScale, this.maxScale);
 
     const fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
