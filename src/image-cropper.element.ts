@@ -14,8 +14,8 @@ export class UmbImageCropperElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      height: 800px;
-      width: 1200px;
+      height: 600px;
+      width: 800px;
     }
   `;
 }

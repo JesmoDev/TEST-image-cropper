@@ -42,16 +42,16 @@ export class UmbImageCropperCropperElement extends LitElement {
   private async addEventListeners() {
     await this.updateComplete;
     this.image.addEventListener("mousedown", this.onStartDrag.bind(this));
-    this.addEventListener("mousemove", this.onDrag.bind(this));
-    this.addEventListener("mouseup", this.onEndDrag.bind(this));
+    window.addEventListener("mousemove", this.onDrag.bind(this));
+    window.addEventListener("mouseup", this.onEndDrag.bind(this));
     window.addEventListener("keydown", this.onKeyDown.bind(this));
     this.addEventListener("wheel", this.onWheel.bind(this));
   }
 
   private removeEventListeners() {
     this.image.removeEventListener("mousedown", this.onStartDrag.bind(this));
-    this.removeEventListener("mousemove", this.onDrag.bind(this));
-    this.removeEventListener("mouseup", this.onEndDrag.bind(this));
+    window.removeEventListener("mousemove", this.onDrag.bind(this));
+    window.removeEventListener("mouseup", this.onEndDrag.bind(this));
     this.removeEventListener("wheel", this.onWheel.bind(this));
     window.removeEventListener("keydown", this.onKeyDown.bind(this));
   }
