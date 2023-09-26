@@ -1,14 +1,8 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 
-/**
- * An example element.
- *
- * @slot - This element has a slot
- * @csspart button - The button
- */
-@customElement("my-element2")
-export class MyElement2 extends LitElement {
+@customElement("umb-image-cropper-cropper")
+export class UmbImageCropperCropperElement extends LitElement {
   @query("#viewport") viewport!: HTMLElement;
   @query("#mask") mask!: HTMLElement;
   @query("#image") image!: HTMLImageElement;
@@ -229,8 +223,9 @@ export class MyElement2 extends LitElement {
   static styles = css`
     :host {
       display: block;
-      height: 800px;
-      width: 1200px;
+      height: 100%;
+      width: 100%;
+      border: 1px solid black;
     }
     #viewport {
       background-color: #fff;
@@ -271,6 +266,6 @@ export class MyElement2 extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "my-element2": MyElement2;
+    "umb-image-cropper-cropper": UmbImageCropperCropperElement;
   }
 }
