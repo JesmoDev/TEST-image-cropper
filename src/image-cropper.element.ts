@@ -15,8 +15,6 @@ export class UmbImageCropperElement extends LitElement {
   }
   set zoom(value) {
     const delta = value - this._zoom;
-
-    console.log(this._zoom, value, delta);
     this.#updateImageScale(delta);
   }
 
@@ -57,8 +55,6 @@ export class UmbImageCropperElement extends LitElement {
   protected update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     super.update(changedProperties);
     if (changedProperties.has("cropWidth") || changedProperties.has("cropHeight")) {
-      console.log("update");
-
       this.#init();
     }
   }
@@ -124,7 +120,8 @@ export class UmbImageCropperElement extends LitElement {
     if (!this.image.complete) {
       await new Promise((resolve) => (this.image.onload = () => resolve(this.image)));
     }
-    console.log("init");
+
+    this._zoom = 0;
 
     const cropAspectRatio = this.cropWidth / this.cropHeight;
 
