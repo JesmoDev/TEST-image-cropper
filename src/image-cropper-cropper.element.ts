@@ -9,6 +9,10 @@ export class UmbImageCropperCropperElement extends LitElement {
 
   @property({ type: Number }) cropWidth = 1000;
   @property({ type: Number }) cropHeight = 800;
+  @property({ type: Number })
+  set zoom(value: number) {
+    this.imageScale = value;
+  }
 
   @state() viewportPadding = 50;
   @state() imageScale = 1;
@@ -153,6 +157,8 @@ export class UmbImageCropperCropperElement extends LitElement {
     // TODO: How do i make this feel more natural?
     const newScale = this.#clamp(this.imageScale + amount * (this.imageScale * this.imageScale), this.minScale, this.maxScale);
 
+    console.log(newScale, this.minScale, this.maxScale);
+
     let fixedLocation = { x: 0, y: 0 };
 
     if (mouseX && mouseY) {
@@ -210,6 +216,14 @@ export class UmbImageCropperCropperElement extends LitElement {
 
   #clamp(value: number, min: number, max: number) {
     return Math.min(Math.max(value, min), max);
+  }
+
+  #lerp(start: number, end: number, alpha: number) {
+    // Ensure that alpha is clamped between 0 and 1
+    alpha = Math.max(0, Math.min(1, alpha));
+
+    // Perform linear interpolation
+    return start * (1 - alpha) + end * alpha;
   }
 
   render() {
