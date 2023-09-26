@@ -76,8 +76,7 @@ export class MyElement2 extends LitElement {
       let newLeft = event.clientX - this.offsetX;
       let newTop = event.clientY - this.offsetY;
 
-      this.image.style.left = `${newLeft}px`;
-      this.image.style.top = `${newTop}px`;
+      this.#updateImagePosition(newTop, newLeft);
     }
   }
 
@@ -176,13 +175,34 @@ export class MyElement2 extends LitElement {
 
     this.imageScale = newScale;
 
-    console.clear();
-    console.log("image scale", this.imageScale);
-
     this.image.style.width = `${this.image.naturalWidth * this.imageScale}px`;
     this.image.style.height = `${this.image.naturalHeight * this.imageScale}px`;
-    this.image.style.left = `${imageLeft}px`;
-    this.image.style.top = `${imageTop}px`;
+
+    this.#updateImagePosition(imageTop, imageLeft);
+  }
+
+  #updateImagePosition(top: number, left: number) {
+    const maskRect = this.mask.getBoundingClientRect();
+    const imageRect = this.image.getBoundingClientRect();
+
+    const imageWidth = imageRect.width;
+    const imageHeight = imageRect.height;
+
+    const maskWidth = maskRect.width;
+    const maskHeight = maskRect.height;
+
+    // Calculate the minimum and maximum image positions
+    const minLeft = this.#toLocalPosition(maskRect.left + maskWidth - imageWidth, 0).x;
+    const maxLeft = this.#toLocalPosition(maskRect.left, 0).x;
+    const minTop = this.#toLocalPosition(0, maskRect.top + maskHeight - imageHeight).y;
+    const maxTop = this.#toLocalPosition(0, maskRect.top).y;
+
+    // Clamp the image position to the min and max values
+    left = this.#clamp(left, minLeft, maxLeft);
+    top = this.#clamp(top, minTop, maxTop);
+
+    this.image.style.left = `${left}px`;
+    this.image.style.top = `${top}px`;
   }
 
   #toLocalPosition(x: number, y: number) {
