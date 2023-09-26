@@ -9,20 +9,21 @@ export class UmbImageCropperCropperElement extends LitElement {
 
   @property({ type: Number }) cropWidth = 1000;
   @property({ type: Number }) cropHeight = 800;
-  @property({ type: Number })
-  set zoom(value: number) {
-    this.imageScale = value;
-  }
+  @property({ type: Number }) zoom = 0;
 
   @state() viewportPadding = 50;
-  @state() imageScale = 1;
   @state() maxScaleFactor = 4;
 
-  private maxScale = 0;
-  private minScale = 0;
+  private maxImageScale = 0;
+  private minImageScale = 0;
+  private oldImageScale = 0;
   private isDragging = false;
-  private offsetX = 0;
-  private offsetY = 0;
+  private mouseOffsetX = 0;
+  private mouseOffsetY = 0;
+
+  get imageScale() {
+    return this.#lerp(this.minImageScale, this.maxImageScale, this.zoom);
+  }
 
   /* change event props
   crop size
@@ -65,14 +66,14 @@ export class UmbImageCropperCropperElement extends LitElement {
     this.isDragging = true;
     const imageRect = this.image.getBoundingClientRect();
     const viewportRect = this.viewport.getBoundingClientRect();
-    this.offsetX = event.clientX - imageRect.left + viewportRect.left;
-    this.offsetY = event.clientY - imageRect.top + viewportRect.top;
+    this.mouseOffsetX = event.clientX - imageRect.left + viewportRect.left;
+    this.mouseOffsetY = event.clientY - imageRect.top + viewportRect.top;
   }
 
   private onDrag(event: MouseEvent) {
     if (this.isDragging) {
-      let newLeft = event.clientX - this.offsetX;
-      let newTop = event.clientY - this.offsetY;
+      let newLeft = event.clientX - this.mouseOffsetX;
+      let newTop = event.clientY - this.mouseOffsetY;
 
       this.#updateImagePosition(newTop, newLeft);
     }
@@ -84,7 +85,6 @@ export class UmbImageCropperCropperElement extends LitElement {
 
   private onWheel(event: WheelEvent) {
     event.preventDefault();
-
     this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
   }
 
@@ -131,13 +131,13 @@ export class UmbImageCropperCropperElement extends LitElement {
     // Calculate the scaling factors to fill the mask area while preserving aspect ratio
     const scaleX = maskWidth / this.image.naturalWidth;
     const scaleY = maskHeight / this.image.naturalHeight;
-    this.imageScale = Math.max(scaleX, scaleY);
-    this.minScale = this.imageScale;
-    this.maxScale = this.imageScale * this.maxScaleFactor;
+    const scale = Math.max(scaleX, scaleY);
+    this.minImageScale = scale;
+    this.maxImageScale = scale * this.maxScaleFactor;
 
     // Set the image size to fill the mask while preserving aspect ratio
-    const imageWidth = this.image.naturalWidth * this.minScale;
-    const imageHeight = this.image.naturalHeight * this.minScale;
+    const imageWidth = this.image.naturalWidth * this.minImageScale;
+    const imageHeight = this.image.naturalHeight * this.minImageScale;
 
     // Center the image within the mask
     const imageLeft = maskLeft + (maskWidth - imageWidth) / 2;
@@ -150,14 +150,11 @@ export class UmbImageCropperCropperElement extends LitElement {
   }
 
   #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {
+    this.oldImageScale = this.imageScale;
+    this.zoom = this.#clamp(this.zoom + amount, 0, 1);
+
     const maskRect = this.mask.getBoundingClientRect();
     const imageRect = this.image.getBoundingClientRect();
-
-    // Calculate the new zoom factor
-    // TODO: How do i make this feel more natural?
-    const newScale = this.#clamp(this.imageScale + amount * (this.imageScale * this.imageScale), this.minScale, this.maxScale);
-
-    console.log(newScale, this.minScale, this.maxScale);
 
     let fixedLocation = { x: 0, y: 0 };
 
@@ -170,10 +167,8 @@ export class UmbImageCropperCropperElement extends LitElement {
     const imageLocation = this.#toLocalPosition(imageRect.left, imageRect.top);
 
     // Calculate the new image position to keep the center of the mask fixed
-    const imageLeft = fixedLocation.x - (fixedLocation.x - imageLocation.x) * (newScale / this.imageScale);
-    const imageTop = fixedLocation.y - (fixedLocation.y - imageLocation.y) * (newScale / this.imageScale);
-
-    this.imageScale = newScale;
+    const imageLeft = fixedLocation.x - (fixedLocation.x - imageLocation.x) * (this.imageScale / this.oldImageScale);
+    const imageTop = fixedLocation.y - (fixedLocation.y - imageLocation.y) * (this.imageScale / this.oldImageScale);
 
     this.image.style.width = `${this.image.naturalWidth * this.imageScale}px`;
     this.image.style.height = `${this.image.naturalHeight * this.imageScale}px`;
