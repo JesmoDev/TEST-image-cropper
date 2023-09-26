@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, PropertyValueMap, css, html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 
 @customElement("umb-image-cropper")
@@ -52,6 +52,15 @@ export class UmbImageCropperElement extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.removeEventListeners();
+  }
+
+  protected update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    super.update(changedProperties);
+    if (changedProperties.has("cropWidth") || changedProperties.has("cropHeight")) {
+      console.log("update");
+
+      this.#init();
+    }
   }
 
   private async addEventListeners() {
@@ -111,7 +120,11 @@ export class UmbImageCropperElement extends LitElement {
   async #init() {
     // Makes sure the image is loaded before calculating the layout
     await this.updateComplete;
-    await new Promise((resolve) => (this.image.onload = () => resolve(this.image)));
+
+    if (!this.image.complete) {
+      await new Promise((resolve) => (this.image.onload = () => resolve(this.image)));
+    }
+    console.log("init");
 
     const cropAspectRatio = this.cropWidth / this.cropHeight;
 

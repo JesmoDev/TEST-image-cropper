@@ -21,8 +21,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     {
       name: "Desktop",
       dimensions: {
-        width: 1000,
-        height: 800,
+        width: 1920,
+        height: 1080,
       },
       crop: {
         x1: 0,
@@ -34,8 +34,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     {
       name: "Tablet",
       dimensions: {
-        width: 800,
-        height: 600,
+        width: 600,
+        height: 800,
       },
       crop: {
         x1: 0,
@@ -48,7 +48,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       name: "Mobile",
       dimensions: {
         width: 400,
-        height: 300,
+        height: 800,
       },
       crop: {
         x1: 0,
@@ -59,6 +59,9 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     },
   ];
 
+  @state()
+  currentCrop = this.crops[0];
+
   render() {
     return html`
       <div id="main">${this.#renderMain()}</div>
@@ -66,15 +69,24 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     `;
   }
 
+  #onCropClick(crop: any) {
+    this.currentCrop = crop;
+    this.showCrop = true;
+
+    this.requestUpdate();
+  }
+
   #renderMain() {
-    return this.showCrop ? html`<umb-image-cropper></umb-image-cropper>` : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
+    return this.showCrop
+      ? html`<umb-image-cropper .cropHeight=${this.currentCrop.dimensions.height} .cropWidth=${this.currentCrop.dimensions.width}></umb-image-cropper>`
+      : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {
     return repeat(
       this.crops,
       (crop) => crop.name,
-      (crop) => html`<umb-image-cropper-preview .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`
+      (crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`
     );
   }
   static styles = css`
