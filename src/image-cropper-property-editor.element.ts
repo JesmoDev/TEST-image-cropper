@@ -15,9 +15,43 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   showCrop = true;
 
   @state()
-  image = "src/assets/image1.png";
+  image = "src/assets/TEST 4.png";
 
   crops = [
+    {
+      name: "TopLeft",
+      dimensions: {
+        width: 1000,
+        height: 1000,
+      },
+      crop: {
+        x1: 0,
+        y1: 0,
+        x2: 0.5,
+        y2: 0.5,
+      },
+      focalPoint: {
+        x: 0.5,
+        y: 0.5,
+      },
+    },
+    {
+      name: "bottomRight",
+      dimensions: {
+        width: 1000,
+        height: 1000,
+      },
+      crop: {
+        x1: 0.5,
+        y1: 0.5,
+        x2: 0,
+        y2: 0,
+      },
+      focalPoint: {
+        x: 0.5,
+        y: 0.5,
+      },
+    },
     {
       name: "Desktop",
       dimensions: {
@@ -29,6 +63,27 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         y1: 0,
         x2: 1,
         y2: 1,
+      },
+      focalPoint: {
+        x: 0.5,
+        y: 0.5,
+      },
+    },
+    {
+      name: "Banner",
+      dimensions: {
+        width: 1920,
+        height: 300,
+      },
+      crop: {
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 1,
+      },
+      focalPoint: {
+        x: 0.5,
+        y: 0.5,
       },
     },
     {
@@ -43,6 +98,10 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 1,
         y2: 1,
       },
+      focalPoint: {
+        x: 0.5,
+        y: 0.5,
+      },
     },
     {
       name: "Mobile",
@@ -55,6 +114,10 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         y1: 0,
         x2: 1,
         y2: 1,
+      },
+      focalPoint: {
+        x: 0.5,
+        y: 0.5,
       },
     },
   ];

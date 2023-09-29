@@ -250,7 +250,7 @@ export class UmbImageCropperElement extends LitElement {
   render() {
     return html`
       <div id="viewport">
-        <img id="image" src="src/assets/image1.png" alt="" />
+        <img id="image" src="src/assets/TEST 4.png" alt="" />
         <div id="mask"></div>
       </div>
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
