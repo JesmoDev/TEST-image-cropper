@@ -3,6 +3,7 @@ import { customElement, property, query, state } from "lit/decorators.js";
 
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
+import { UmbImageCropperCrop } from ".";
 
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
@@ -10,23 +11,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
   @query("#image-container") imageContainerElement!: HTMLImageElement;
 
   @property({ type: Object, attribute: false })
-  crop?: {
-    name: string;
-    dimensions: {
-      width: number;
-      height: number;
-    };
-    crop: {
-      x1: number;
-      y1: number;
-      x2: number;
-      y2: number;
-    };
-    focalPoint: {
-      x: number;
-      y: number;
-    };
-  };
+  crop?: UmbImageCropperCrop;
 
   @property({ type: String, attribute: false })
   image: string = "";

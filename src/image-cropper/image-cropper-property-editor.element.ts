@@ -5,6 +5,7 @@ import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
 import "./image-cropper-preview.element";
 import { repeat } from "lit/directives/repeat.js";
+import { UmbImageCropperCrop } from ".";
 
 @customElement("umb-image-cropper-property-editor")
 export class UmbImageCropperPropertyEditorElement extends LitElement {
@@ -17,7 +18,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   image = "src/assets/TEST 4.png";
 
-  crops = [
+  crops: Array<UmbImageCropperCrop> = [
     {
       name: "TopLeft",
       dimensions: {
@@ -30,10 +31,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 0.5,
         y2: 0.5,
       },
-      focalPoint: {
-        x: 0.5,
-        y: 0.5,
-      },
+      focalPoint: this.focalPoint,
     },
     {
       name: "bottomRight",
@@ -47,10 +45,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 0,
         y2: 0,
       },
-      focalPoint: {
-        x: 0.5,
-        y: 0.5,
-      },
+      focalPoint: this.focalPoint,
     },
     {
       name: "Desktop",
@@ -64,10 +59,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 1,
         y2: 1,
       },
-      focalPoint: {
-        x: 0.5,
-        y: 0.5,
-      },
+      focalPoint: this.focalPoint,
     },
     {
       name: "Banner",
@@ -81,10 +73,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 1,
         y2: 1,
       },
-      focalPoint: {
-        x: 0.5,
-        y: 0.5,
-      },
+      focalPoint: this.focalPoint,
     },
     {
       name: "Tablet",
@@ -98,10 +87,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 1,
         y2: 1,
       },
-      focalPoint: {
-        x: 0.5,
-        y: 0.5,
-      },
+      focalPoint: this.focalPoint,
     },
     {
       name: "Mobile",
@@ -115,10 +101,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         x2: 1,
         y2: 1,
       },
-      focalPoint: {
-        x: 0.5,
-        y: 0.5,
-      },
+      focalPoint: this.focalPoint,
     },
   ];
 

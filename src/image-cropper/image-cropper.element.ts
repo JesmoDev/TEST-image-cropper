@@ -1,11 +1,14 @@
 import { LitElement, PropertyValueMap, css, html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
+import { UmbImageCropperCrop } from ".";
 
 @customElement("umb-image-cropper")
 export class UmbImageCropperElement extends LitElement {
   @query("#viewport") viewport!: HTMLElement;
   @query("#mask") mask!: HTMLElement;
   @query("#image") image!: HTMLImageElement;
+
+  @property({ attribute: false }) crop?: UmbImageCropperCrop;
 
   @property({ type: Number }) cropWidth = 1000;
   @property({ type: Number }) cropHeight = 800;
