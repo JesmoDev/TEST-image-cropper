@@ -10,8 +10,8 @@ export class UmbImageCropperElement extends LitElement {
 
   @property({ attribute: false }) crop?: UmbImageCropperCrop;
 
-  @property({ type: Number }) cropWidth = 1000;
-  @property({ type: Number }) cropHeight = 800;
+  // @property({ type: Number }) cropWidth = 1000;
+  // @property({ type: Number }) cropHeight = 800;
   @property({ type: Number })
   get zoom() {
     return this._zoom;
@@ -57,7 +57,7 @@ export class UmbImageCropperElement extends LitElement {
 
   protected update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     super.update(changedProperties);
-    if (changedProperties.has("cropWidth") || changedProperties.has("cropHeight")) {
+    if (changedProperties.has("crop")) {
       this.#init();
     }
   }
@@ -117,6 +117,8 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   async #init() {
+    if (!this.crop) return;
+
     // Makes sure the image is loaded before calculating the layout
     await this.updateComplete;
 
@@ -126,7 +128,7 @@ export class UmbImageCropperElement extends LitElement {
 
     this._zoom = 0;
 
-    const cropAspectRatio = this.cropWidth / this.cropHeight;
+    const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
 
     const viewportWidth = this.viewport.clientWidth;
     const viewportHeight = this.viewport.clientHeight;
@@ -170,6 +172,8 @@ export class UmbImageCropperElement extends LitElement {
     this.image.style.height = `${imageHeight}px`;
     this.image.style.left = `${imageLeft}px`;
     this.image.style.top = `${imageTop}px`;
+
+    console.log(maskTop);
   }
 
   #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {

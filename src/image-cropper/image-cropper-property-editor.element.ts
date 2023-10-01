@@ -123,9 +123,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   #renderMain() {
-    return this.showCrop
-      ? html`<umb-image-cropper .cropHeight=${this.currentCrop.dimensions.height} .cropWidth=${this.currentCrop.dimensions.width}></umb-image-cropper>`
-      : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
+    return this.showCrop ? html`<umb-image-cropper .crop=${this.currentCrop}></umb-image-cropper>` : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {
@@ -137,10 +135,9 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
   static styles = css`
     :host {
-      display: grid;
-      grid-template-columns: 1fr auto;
+      display: flex;
       height: 600px;
-      width: 800px;
+      width: 100%;
       box-sizing: border-box;
       gap: 8px;
     }
@@ -148,10 +145,14 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     #side {
       height: 100%;
     }
+    #main {
+      flex-grow: 1;
+    }
     #side {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      width: 150px;
     }
   `;
 }

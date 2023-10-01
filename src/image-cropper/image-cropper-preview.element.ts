@@ -34,14 +34,13 @@ export class UmbImageCropperPreviewElement extends LitElement {
   }
 
   async #init() {
+    if (!this.crop) return;
+
     await this.updateComplete;
 
     if (!this.imageElement.complete) {
       await new Promise((resolve) => (this.imageElement.onload = () => resolve(this.imageElement)));
     }
-
-    if (!this.crop) return;
-    console.log(this.crop);
 
     const imageContainerRect = this.imageContainerElement.getBoundingClientRect();
     let imageContainerWidth = imageContainerRect.width;
@@ -107,12 +106,11 @@ export class UmbImageCropperPreviewElement extends LitElement {
       outline: 1px solid black;
       padding: 12px;
       border-radius: 4px;
-      width: 200px;
     }
     #image-container {
       display: flex;
-      width: 100px;
-      height: 100px;
+      width: 100%;
+      aspect-ratio: 1;
       overflow: hidden;
       outline: 1px solid black;
       position: relative;
