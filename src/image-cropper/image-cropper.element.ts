@@ -333,10 +333,11 @@ export class UmbImageCropperElement extends LitElement {
 
   static styles = css`
     :host {
-      display: block;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 8px;
       height: 100%;
       width: 100%;
-      border: 1px solid black;
     }
     #viewport {
       background-color: #fff;
@@ -348,6 +349,7 @@ export class UmbImageCropperElement extends LitElement {
       position: relative;
       width: 100%;
       height: 100%;
+      outline: 1px solid black;
     }
 
     #mask {

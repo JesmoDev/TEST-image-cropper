@@ -108,18 +108,21 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   currentCrop = this.crops[1];
 
-  render() {
-    return html`
-      <div id="main">${this.#renderMain()}</div>
-      <div id="side">${this.#renderSide()}</div>
-    `;
-  }
-
   #onCropClick(crop: any) {
     this.currentCrop = crop;
     this.showCrop = true;
 
     this.requestUpdate();
+  }
+
+  render() {
+    return html`
+      <div id="main">
+        ${this.#renderMain()}
+        <button style="margin-top: 8px">Save</button>
+      </div>
+      <div id="side">${this.#renderSide()}</div>
+    `;
   }
 
   #renderMain() {
