@@ -1,6 +1,7 @@
 import { LitElement, PropertyValueMap, css, html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { UmbImageCropperCrop } from ".";
+import { clamp, inverseLerp, lerp } from "./mathUtils";
 
 @customElement("umb-image-cropper")
 export class UmbImageCropperElement extends LitElement {
@@ -33,7 +34,7 @@ export class UmbImageCropperElement extends LitElement {
   private mouseOffsetY = 0;
 
   get imageScale() {
-    return this.#lerp(this.minImageScale, this.maxImageScale, this._zoom);
+    return lerp(this.minImageScale, this.maxImageScale, this._zoom);
   }
 
   /* change event props
@@ -196,7 +197,7 @@ export class UmbImageCropperElement extends LitElement {
     const currentScaleY = imageHeight / this.imageElement.naturalHeight;
     const currentScale = Math.max(currentScaleX, currentScaleY);
 
-    this._zoom = this.#inverseLerp(this.minImageScale, this.maxImageScale, currentScale);
+    this._zoom = inverseLerp(this.minImageScale, this.maxImageScale, currentScale);
   }
 
   async #init() {
@@ -264,7 +265,7 @@ export class UmbImageCropperElement extends LitElement {
 
   #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {
     this.oldImageScale = this.imageScale;
-    this._zoom = this.#clamp(this._zoom + amount, 0, 1);
+    this._zoom = clamp(this._zoom + amount, 0, 1);
 
     const maskRect = this.maskElement.getBoundingClientRect();
     const imageRect = this.imageElement.getBoundingClientRect();
@@ -306,8 +307,8 @@ export class UmbImageCropperElement extends LitElement {
     const maxTop = this.#toLocalPosition(0, maskRect.top).y;
 
     // Clamp the image position to the min and max values
-    left = this.#clamp(left, minLeft, maxLeft);
-    top = this.#clamp(top, minTop, maxTop);
+    left = clamp(left, minLeft, maxLeft);
+    top = clamp(top, minTop, maxTop);
 
     this.imageElement.style.left = `${left}px`;
     this.imageElement.style.top = `${top}px`;
@@ -320,26 +321,6 @@ export class UmbImageCropperElement extends LitElement {
       x: x - viewportRect.left,
       y: y - viewportRect.top,
     };
-  }
-
-  #clamp(value: number, min: number, max: number) {
-    return Math.min(Math.max(value, min), max);
-  }
-
-  #lerp(start: number, end: number, alpha: number) {
-    // Ensure that alpha is clamped between 0 and 1
-    alpha = Math.max(0, Math.min(1, alpha));
-
-    // Perform linear interpolation
-    return start * (1 - alpha) + end * alpha;
-  }
-
-  #inverseLerp(start: number, end: number, value: number): number {
-    if (start === end) {
-      return 0; // Avoid division by zero if start and end are equal
-    }
-
-    return (value - start) / (end - start);
   }
 
   #onSliderUpdate(event: InputEvent) {
