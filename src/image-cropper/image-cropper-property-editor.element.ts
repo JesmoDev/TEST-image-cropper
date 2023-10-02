@@ -18,6 +18,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   image = "src/assets/TEST 4.png";
 
+  @state()
   crops: Array<UmbImageCropperCrop> = [
     {
       name: "Almost Bot Left",
@@ -150,6 +151,13 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   currentCrop = this.crops[0];
 
+  #currentCropState = {
+    x1: 0,
+    y1: 0,
+    x2: 0,
+    y2: 0,
+  };
+
   #onCropClick(crop: any) {
     this.currentCrop = crop;
     this.showCrop = true;
@@ -158,14 +166,29 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   #onCropChange(event: CustomEvent) {
-    console.log(event.detail.crop, this.currentCrop.crop);
+    this.#currentCropState = event.detail.crop;
   }
+
+  #onSave = () => {
+    this.currentCrop.crop = this.#currentCropState;
+
+    const temp = this.crops;
+
+    // TODO: Fix this
+    // WHY DO I HAVE TO DO THIS!??!?!?
+    this.crops = [];
+    this.requestUpdate();
+    requestAnimationFrame(() => {
+      this.crops = temp;
+      this.requestUpdate();
+    });
+  };
 
   render() {
     return html`
       <div id="main">
         ${this.#renderMain()}
-        <button style="margin-top: 8px">Save</button>
+        <button @click=${this.#onSave} style="margin-top: 8px">Save</button>
       </div>
       <div id="side">${this.#renderSide()}</div>
     `;
@@ -178,11 +201,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   #renderSide() {
-    return repeat(
-      this.crops,
-      (crop) => crop.name,
-      (crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`
-    );
+    return this.crops.map((crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`);
+    return repeat(this.crops, (crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`);
   }
   static styles = css`
     :host {
