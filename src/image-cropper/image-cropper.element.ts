@@ -22,19 +22,19 @@ export class UmbImageCropperElement extends LitElement {
     this.#updateImageScale(delta);
   }
 
-  @state() private viewportPadding = 50;
-  @state() private maxScaleFactor = 4;
+  @state() private _viewportPadding = 50;
+  @state() private _maxScaleFactor = 4;
   @state() private _zoom = 0;
 
-  private maxImageScale = 0;
-  private minImageScale = 0;
-  private oldImageScale = 0;
-  private isDragging = false;
-  private mouseOffsetX = 0;
-  private mouseOffsetY = 0;
+  #maxImageScale = 0;
+  #minImageScale = 0;
+  #oldImageScale = 0;
+  #isDragging = false;
+  #mouseOffsetX = 0;
+  #mouseOffsetY = 0;
 
   get imageScale() {
-    return lerp(this.minImageScale, this.maxImageScale, this._zoom);
+    return lerp(this.#minImageScale, this.#maxImageScale, this._zoom);
   }
 
   /* change event props
@@ -47,77 +47,40 @@ export class UmbImageCropperElement extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addEventListeners();
-    this.#init2();
+    this.#addEventListeners();
+    this.#initializeCrop();
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListeners();
+    this.#removeEventListeners();
+  }
+
+  async #addEventListeners() {
+    await this.updateComplete;
+    this.imageElement.addEventListener("mousedown", this.#onStartDrag.bind(this));
+    window.addEventListener("mousemove", this.#onDrag.bind(this));
+    window.addEventListener("mouseup", this.#onEndDrag.bind(this));
+    window.addEventListener("keydown", this.#onKeyDown.bind(this));
+    this.addEventListener("wheel", this.#onWheel.bind(this));
+  }
+
+  #removeEventListeners() {
+    this.imageElement.removeEventListener("mousedown", this.#onStartDrag.bind(this));
+    window.removeEventListener("mousemove", this.#onDrag.bind(this));
+    window.removeEventListener("mouseup", this.#onEndDrag.bind(this));
+    this.removeEventListener("wheel", this.#onWheel.bind(this));
+    window.removeEventListener("keydown", this.#onKeyDown.bind(this));
   }
 
   protected update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     super.update(changedProperties);
     if (changedProperties.has("crop")) {
-      this.#init2();
+      this.#initializeCrop();
     }
   }
 
-  private async addEventListeners() {
-    await this.updateComplete;
-    this.imageElement.addEventListener("mousedown", this.onStartDrag.bind(this));
-    window.addEventListener("mousemove", this.onDrag.bind(this));
-    window.addEventListener("mouseup", this.onEndDrag.bind(this));
-    window.addEventListener("keydown", this.onKeyDown.bind(this));
-    this.addEventListener("wheel", this.onWheel.bind(this));
-  }
-
-  private removeEventListeners() {
-    this.imageElement.removeEventListener("mousedown", this.onStartDrag.bind(this));
-    window.removeEventListener("mousemove", this.onDrag.bind(this));
-    window.removeEventListener("mouseup", this.onEndDrag.bind(this));
-    this.removeEventListener("wheel", this.onWheel.bind(this));
-    window.removeEventListener("keydown", this.onKeyDown.bind(this));
-  }
-
-  private onStartDrag(event: MouseEvent) {
-    event.preventDefault();
-    this.isDragging = true;
-    const imageRect = this.imageElement.getBoundingClientRect();
-    const viewportRect = this.viewportElement.getBoundingClientRect();
-    this.mouseOffsetX = event.clientX - imageRect.left + viewportRect.left;
-    this.mouseOffsetY = event.clientY - imageRect.top + viewportRect.top;
-  }
-
-  private onDrag(event: MouseEvent) {
-    if (this.isDragging) {
-      let newLeft = event.clientX - this.mouseOffsetX;
-      let newTop = event.clientY - this.mouseOffsetY;
-
-      this.#updateImagePosition(newTop, newLeft);
-    }
-  }
-
-  private onEndDrag() {
-    this.isDragging = false;
-  }
-
-  private onWheel(event: WheelEvent) {
-    event.preventDefault();
-    this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
-  }
-
-  private onKeyDown(event: KeyboardEvent) {
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      this.#updateImageScale(0.1);
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      this.#updateImageScale(-0.1);
-    }
-  }
-
-  async #init2() {
+  async #initializeCrop() {
     if (!this.crop) return;
 
     await this.updateComplete;
@@ -126,14 +89,12 @@ export class UmbImageCropperElement extends LitElement {
       await new Promise((resolve) => (this.imageElement.onload = () => resolve(this.imageElement)));
     }
 
-    this._zoom = 0;
-
-    const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
-    const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
-
     const viewportWidth = this.viewportElement.clientWidth;
     const viewportHeight = this.viewportElement.clientHeight;
     const viewportAspectRatio = viewportWidth / viewportHeight;
+
+    const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
+    const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
     let maskWidth = 0;
     let maskHeight = 0;
@@ -141,11 +102,11 @@ export class UmbImageCropperElement extends LitElement {
     let imageHeight = 0;
 
     if (cropAspectRatio > viewportAspectRatio) {
-      maskWidth = viewportWidth - this.viewportPadding * 2;
-      maskHeight = (viewportWidth - this.viewportPadding * 2) / cropAspectRatio;
+      maskWidth = viewportWidth - this._viewportPadding * 2;
+      maskHeight = (viewportWidth - this._viewportPadding * 2) / cropAspectRatio;
     } else {
-      maskHeight = viewportHeight - this.viewportPadding * 2;
-      maskWidth = (viewportHeight - this.viewportPadding * 2) * cropAspectRatio;
+      maskHeight = viewportHeight - this._viewportPadding * 2;
+      maskWidth = (viewportHeight - this._viewportPadding * 2) * cropAspectRatio;
     }
 
     const maskLeft = (viewportWidth - maskWidth) / 2;
@@ -182,82 +143,83 @@ export class UmbImageCropperElement extends LitElement {
     const scaleX = maskWidth / this.imageElement.naturalWidth;
     const scaleY = maskHeight / this.imageElement.naturalHeight;
     const scale = Math.max(scaleX, scaleY);
-    this.minImageScale = scale;
-    this.maxImageScale = scale * this.maxScaleFactor;
+    this.#minImageScale = scale;
+    this.#maxImageScale = scale * this._maxScaleFactor;
 
     const currentScaleX = imageWidth / this.imageElement.naturalWidth;
     const currentScaleY = imageHeight / this.imageElement.naturalHeight;
     const currentScale = Math.max(currentScaleX, currentScaleY);
 
-    this._zoom = inverseLerp(this.minImageScale, this.maxImageScale, currentScale);
+    //Calculate the zoom level based on the current scale
+    this._zoom = inverseLerp(this.#minImageScale, this.#maxImageScale, currentScale);
     this.#updateImageScale(0);
   }
 
-  async #init() {
-    if (!this.crop) return;
+  // async #init_OLD() {
+  //   if (!this.crop) return;
 
-    // Makes sure the image is loaded before calculating the layout
-    await this.updateComplete;
+  //   // Makes sure the image is loaded before calculating the layout
+  //   await this.updateComplete;
 
-    if (!this.imageElement.complete) {
-      await new Promise((resolve) => (this.imageElement.onload = () => resolve(this.imageElement)));
-    }
+  //   if (!this.imageElement.complete) {
+  //     await new Promise((resolve) => (this.imageElement.onload = () => resolve(this.imageElement)));
+  //   }
 
-    this._zoom = 0;
+  //   this._zoom = 0;
 
-    const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
+  //   const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
 
-    const viewportWidth = this.viewportElement.clientWidth;
-    const viewportHeight = this.viewportElement.clientHeight;
-    const viewportAspectRatio = viewportWidth / viewportHeight;
+  //   const viewportWidth = this.viewportElement.clientWidth;
+  //   const viewportHeight = this.viewportElement.clientHeight;
+  //   const viewportAspectRatio = viewportWidth / viewportHeight;
 
-    let maskWidth = 0;
-    let maskHeight = 0;
+  //   let maskWidth = 0;
+  //   let maskHeight = 0;
 
-    if (cropAspectRatio > viewportAspectRatio) {
-      maskWidth = viewportWidth - this.viewportPadding * 2;
-      maskHeight = (viewportWidth - this.viewportPadding * 2) / cropAspectRatio;
-    } else {
-      maskHeight = viewportHeight - this.viewportPadding * 2;
-      maskWidth = (viewportHeight - this.viewportPadding * 2) * cropAspectRatio;
-    }
+  //   if (cropAspectRatio > viewportAspectRatio) {
+  //     maskWidth = viewportWidth - this.viewportPadding * 2;
+  //     maskHeight = (viewportWidth - this.viewportPadding * 2) / cropAspectRatio;
+  //   } else {
+  //     maskHeight = viewportHeight - this.viewportPadding * 2;
+  //     maskWidth = (viewportHeight - this.viewportPadding * 2) * cropAspectRatio;
+  //   }
 
-    const maskLeft = (viewportWidth - maskWidth) / 2;
-    const maskTop = (viewportHeight - maskHeight) / 2;
+  //   const maskLeft = (viewportWidth - maskWidth) / 2;
+  //   const maskTop = (viewportHeight - maskHeight) / 2;
 
-    this.maskElement.style.width = `${maskWidth}px`;
-    this.maskElement.style.height = `${maskHeight}px`;
-    this.maskElement.style.left = `${maskLeft}px`;
-    this.maskElement.style.top = `${maskTop}px`;
+  //   this.maskElement.style.width = `${maskWidth}px`;
+  //   this.maskElement.style.height = `${maskHeight}px`;
+  //   this.maskElement.style.left = `${maskLeft}px`;
+  //   this.maskElement.style.top = `${maskTop}px`;
 
-    // Calculate the scaling factors to fill the mask area while preserving aspect ratio
-    const scaleX = maskWidth / this.imageElement.naturalWidth;
-    const scaleY = maskHeight / this.imageElement.naturalHeight;
-    const scale = Math.max(scaleX, scaleY);
-    this.minImageScale = scale;
-    this.maxImageScale = scale * this.maxScaleFactor;
+  //   // Calculate the scaling factors to fill the mask area while preserving aspect ratio
+  //   const scaleX = maskWidth / this.imageElement.naturalWidth;
+  //   const scaleY = maskHeight / this.imageElement.naturalHeight;
+  //   const scale = Math.max(scaleX, scaleY);
+  //   this.minImageScale = scale;
+  //   this.maxImageScale = scale * this.maxScaleFactor;
 
-    // Set the image size to fill the mask while preserving aspect ratio
-    const imageWidth = this.imageElement.naturalWidth * this.minImageScale;
-    const imageHeight = this.imageElement.naturalHeight * this.minImageScale;
+  //   // Set the image size to fill the mask while preserving aspect ratio
+  //   const imageWidth = this.imageElement.naturalWidth * this.minImageScale;
+  //   const imageHeight = this.imageElement.naturalHeight * this.minImageScale;
 
-    // Center the image within the mask based on the focal point
-    const imageLeft = maskLeft + (maskWidth - imageWidth) * this.crop.focalPoint.x;
-    const imageTop = maskTop + (maskHeight - imageHeight) * this.crop.focalPoint.y;
+  //   // Center the image within the mask based on the focal point
+  //   const imageLeft = maskLeft + (maskWidth - imageWidth) * this.crop.focalPoint.x;
+  //   const imageTop = maskTop + (maskHeight - imageHeight) * this.crop.focalPoint.y;
 
-    // const imageLeft = maskLeft + (maskWidth - imageWidth) / 2;
-    // const imageTop = maskTop + (maskHeight - imageHeight) / 2;
+  //   // const imageLeft = maskLeft + (maskWidth - imageWidth) / 2;
+  //   // const imageTop = maskTop + (maskHeight - imageHeight) / 2;
 
-    this.imageElement.style.width = `${imageWidth}px`;
-    this.imageElement.style.height = `${imageHeight}px`;
-    this.imageElement.style.left = `${imageLeft}px`;
-    this.imageElement.style.top = `${imageTop}px`;
+  //   this.imageElement.style.width = `${imageWidth}px`;
+  //   this.imageElement.style.height = `${imageHeight}px`;
+  //   this.imageElement.style.left = `${imageLeft}px`;
+  //   this.imageElement.style.top = `${imageTop}px`;
 
-    console.log(maskTop);
-  }
+  //   console.log(maskTop);
+  // }
 
   #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {
-    this.oldImageScale = this.imageScale;
+    this.#oldImageScale = this.imageScale;
     this._zoom = clamp(this._zoom + amount, 0, 1);
 
     const maskRect = this.maskElement.getBoundingClientRect();
@@ -274,8 +236,8 @@ export class UmbImageCropperElement extends LitElement {
     const imageLocation = this.#toLocalPosition(imageRect.left, imageRect.top);
 
     // Calculate the new image position to keep the center of the mask fixed
-    const imageLeft = fixedLocation.x - (fixedLocation.x - imageLocation.x) * (this.imageScale / this.oldImageScale);
-    const imageTop = fixedLocation.y - (fixedLocation.y - imageLocation.y) * (this.imageScale / this.oldImageScale);
+    const imageLeft = fixedLocation.x - (fixedLocation.x - imageLocation.x) * (this.imageScale / this.#oldImageScale);
+    const imageTop = fixedLocation.y - (fixedLocation.y - imageLocation.y) * (this.imageScale / this.#oldImageScale);
 
     this.imageElement.style.width = `${this.imageElement.naturalWidth * this.imageScale}px`;
     this.imageElement.style.height = `${this.imageElement.naturalHeight * this.imageScale}px`;
@@ -307,6 +269,49 @@ export class UmbImageCropperElement extends LitElement {
     this.imageElement.style.top = `${top}px`;
   }
 
+  #onSliderUpdate(event: InputEvent) {
+    const target = event.target as HTMLInputElement;
+
+    this.zoom = Number(target.value);
+  }
+
+  #onStartDrag(event: MouseEvent) {
+    event.preventDefault();
+    this.#isDragging = true;
+    const imageRect = this.imageElement.getBoundingClientRect();
+    const viewportRect = this.viewportElement.getBoundingClientRect();
+    this.#mouseOffsetX = event.clientX - imageRect.left + viewportRect.left;
+    this.#mouseOffsetY = event.clientY - imageRect.top + viewportRect.top;
+  }
+
+  #onDrag(event: MouseEvent) {
+    if (this.#isDragging) {
+      let newLeft = event.clientX - this.#mouseOffsetX;
+      let newTop = event.clientY - this.#mouseOffsetY;
+
+      this.#updateImagePosition(newTop, newLeft);
+    }
+  }
+
+  #onEndDrag() {
+    this.#isDragging = false;
+  }
+
+  #onWheel(event: WheelEvent) {
+    event.preventDefault();
+    this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
+  }
+
+  #onKeyDown(event: KeyboardEvent) {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      this.#updateImageScale(0.1);
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      this.#updateImageScale(-0.1);
+    }
+  }
+
   #toLocalPosition(x: number, y: number) {
     const viewportRect = this.viewportElement.getBoundingClientRect();
 
@@ -314,12 +319,6 @@ export class UmbImageCropperElement extends LitElement {
       x: x - viewportRect.left,
       y: y - viewportRect.top,
     };
-  }
-
-  #onSliderUpdate(event: InputEvent) {
-    const target = event.target as HTMLInputElement;
-
-    this.zoom = Number(target.value);
   }
 
   render() {
@@ -331,6 +330,7 @@ export class UmbImageCropperElement extends LitElement {
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
     `;
   }
+
   static styles = css`
     :host {
       display: block;
