@@ -26,6 +26,8 @@ export class UmbImageCropperElement extends LitElement {
   @state() private _maxScaleFactor = 4;
   @state() private _zoom = 0;
 
+  #DEBUG_USE_MOUSE_POSITION_FOR_ZOOM = true; //TODO: Decide and remove
+
   #maxImageScale = 0;
   #minImageScale = 0;
   #oldImageScale = 0;
@@ -227,7 +229,7 @@ export class UmbImageCropperElement extends LitElement {
 
     let fixedLocation = { x: 0, y: 0 };
 
-    if (mouseX && mouseY) {
+    if (mouseX && mouseY && this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM) {
       fixedLocation = this.#toLocalPosition(mouseX, mouseY);
     } else {
       fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
@@ -328,6 +330,17 @@ export class UmbImageCropperElement extends LitElement {
         <div id="mask"></div>
       </div>
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
+
+      <div style="position: absolute; width: fit-content; height: 100px; bottom: 0;">
+        DEBUG: Use mouse position for zoom:
+        <input
+          type="checkbox"
+          ?checked=${this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM}
+          @change=${(e: InputEvent) => {
+            this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM = (e.target as HTMLInputElement).checked;
+          }}
+        />
+      </div>
     `;
   }
 
