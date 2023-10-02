@@ -105,7 +105,7 @@ export class UmbImageCropperElement extends LitElement {
 
     if (cropAspectRatio > viewportAspectRatio) {
       maskWidth = viewportWidth - this._viewportPadding * 2;
-      maskHeight = maskWidth * cropAspectRatio;
+      maskHeight = maskWidth / cropAspectRatio;
     } else {
       maskHeight = viewportHeight - this._viewportPadding * 2;
       maskWidth = maskHeight * cropAspectRatio;
@@ -124,7 +124,7 @@ export class UmbImageCropperElement extends LitElement {
       const cropAmount = this.crop.crop.x1 + this.crop.crop.x2;
       // Use the cropAmount as a factor to increase the mask size, this zooms the image.
       imageWidth = increaseValue(maskWidth, cropAmount);
-      imageHeight = imageWidth * imageAspectRatio;
+      imageHeight = imageWidth / imageAspectRatio;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1 + maskLeft}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
     } else {

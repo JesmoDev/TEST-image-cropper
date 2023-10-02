@@ -41,10 +41,10 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
     if (cropAspectRatio > 1) {
       imageContainerWidth = imageContainerWidth;
-      imageContainerHeight = imageContainerWidth * cropAspectRatio;
+      imageContainerHeight = imageContainerWidth / cropAspectRatio;
       const cropSize = this.crop.crop.x1 + this.crop.crop.x2;
       imageWidth = increaseValue(imageContainerWidth, cropSize);
-      imageHeight = imageWidth * imageAspectRatio;
+      imageHeight = imageWidth / imageAspectRatio;
       this.imageElement.style.width = `${increaseValue(imageContainerWidth, cropSize)}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1}px`;
