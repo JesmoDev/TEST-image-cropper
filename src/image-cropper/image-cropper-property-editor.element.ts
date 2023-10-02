@@ -106,7 +106,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   ];
 
   @state()
-  currentCrop = this.crops[0];
+  currentCrop = this.crops[1];
 
   render() {
     return html`
