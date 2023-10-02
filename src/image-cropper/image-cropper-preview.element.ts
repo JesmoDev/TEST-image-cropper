@@ -4,6 +4,7 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
 import { UmbImageCropperCrop } from ".";
+import { distance, increaseValue } from "./mathUtils";
 
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
@@ -19,18 +20,6 @@ export class UmbImageCropperPreviewElement extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.#init();
-  }
-
-  #calculateIncreasedValue(startValue: number, increaseFactor: number): number {
-    if (increaseFactor < 0 || increaseFactor >= 1) {
-      throw new Error("Increase factor must be between 0 (inclusive) and 1 (exclusive)");
-    }
-
-    return startValue / (1 - increaseFactor);
-  }
-
-  #calculateDistance(a: number, b: number): number {
-    return Math.abs(a - b);
   }
 
   async #init() {
@@ -53,19 +42,19 @@ export class UmbImageCropperPreviewElement extends LitElement {
     if (cropAspectRatio > 1) {
       imageContainerWidth = imageContainerWidth;
       imageContainerHeight = imageContainerWidth / cropAspectRatio;
-      const cropSize = 1 - this.#calculateDistance(this.crop.crop.x1, this.crop.crop.x2);
-      imageWidth = this.#calculateIncreasedValue(imageContainerWidth, cropSize);
+      const cropSize = 1 - distance(this.crop.crop.x1, this.crop.crop.x2);
+      imageWidth = increaseValue(imageContainerWidth, cropSize);
       imageHeight = imageWidth / imageAspectRatio;
-      this.imageElement.style.width = `${this.#calculateIncreasedValue(imageContainerWidth, cropSize)}px`;
+      this.imageElement.style.width = `${increaseValue(imageContainerWidth, cropSize)}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1}px`;
     } else {
       imageContainerWidth = imageContainerHeight * cropAspectRatio;
       imageContainerHeight = imageContainerHeight;
-      const cropSize = 1 - this.#calculateDistance(this.crop.crop.y1, this.crop.crop.y2);
-      imageHeight = this.#calculateIncreasedValue(imageContainerHeight, cropSize);
+      const cropSize = 1 - distance(this.crop.crop.y1, this.crop.crop.y2);
+      imageHeight = increaseValue(imageContainerHeight, cropSize);
       imageWidth = imageHeight * imageAspectRatio;
-      this.imageElement.style.height = `${this.#calculateIncreasedValue(imageContainerHeight, cropSize)}px`;
+      this.imageElement.style.height = `${increaseValue(imageContainerHeight, cropSize)}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1}px`;
     }

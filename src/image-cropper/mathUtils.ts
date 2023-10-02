@@ -17,3 +17,15 @@ export function inverseLerp(start: number, end: number, value: number): number {
 
   return (value - start) / (end - start);
 }
+
+export function distance(a: number, b: number): number {
+  return Math.abs(a - b);
+}
+
+export function increaseValue(startValue: number, increaseFactor: number): number {
+  if (increaseFactor < 0 || increaseFactor >= 1) {
+    throw new Error("Increase factor must be between 0 (inclusive) and 1 (exclusive)");
+  }
+
+  return startValue / (1 - increaseFactor);
+}

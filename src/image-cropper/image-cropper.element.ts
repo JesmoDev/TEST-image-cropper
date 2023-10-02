@@ -1,7 +1,7 @@
 import { LitElement, PropertyValueMap, css, html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { UmbImageCropperCrop } from ".";
-import { clamp, inverseLerp, lerp } from "./mathUtils";
+import { clamp, distance, increaseValue, inverseLerp, lerp } from "./mathUtils";
 
 @customElement("umb-image-cropper")
 export class UmbImageCropperElement extends LitElement {
@@ -117,18 +117,6 @@ export class UmbImageCropperElement extends LitElement {
     }
   }
 
-  #calculateIncreasedValue(startValue: number, increaseFactor: number): number {
-    if (increaseFactor < 0 || increaseFactor >= 1) {
-      throw new Error("Increase factor must be between 0 (inclusive) and 1 (exclusive)");
-    }
-
-    return startValue / (1 - increaseFactor);
-  }
-
-  #calculateDistance(a: number, b: number): number {
-    return Math.abs(a - b);
-  }
-
   async #init2() {
     if (!this.crop) return;
 
@@ -139,8 +127,6 @@ export class UmbImageCropperElement extends LitElement {
     }
 
     this._zoom = 0;
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
@@ -171,17 +157,23 @@ export class UmbImageCropperElement extends LitElement {
     this.maskElement.style.top = `${maskTop}px`;
 
     if (cropAspectRatio > 1) {
-      const cropSize = 1 - this.#calculateDistance(this.crop.crop.x1, this.crop.crop.x2);
-      imageWidth = this.#calculateIncreasedValue(maskWidth, cropSize);
+      // Calculate the distance between the crop points so we can calculate the zoom level
+      // if x1 = 0 and x2 = 1, the distance is 1. subtracting 1 from 1 gives us 0, which later results in no zoom.
+      // if x1 = 0 and x2 = 0.5, the distance is 0.5. subtracting 0.5 from 1 gives us 0.5, which later results in a 100% zoom.
+      const cropZoom = 1 - distance(this.crop.crop.x1, this.crop.crop.x2);
+      // Use the crop zoom as a factor to increase the mask size, this zooms the image.
+      imageWidth = increaseValue(maskWidth, cropZoom);
       imageHeight = imageWidth / imageAspectRatio;
-      this.imageElement.style.width = `${this.#calculateIncreasedValue(maskWidth, cropSize)}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1 + maskLeft}px`;
     } else {
-      const cropSize = 1 - this.#calculateDistance(this.crop.crop.y1, this.crop.crop.y2);
-      imageHeight = this.#calculateIncreasedValue(maskHeight, cropSize);
+      // Calculate the distance between the crop points so we can calculate the zoom level
+      // if y1 = 0 and y2 = 1, the distance is 1. subtracting 1 from 1 gives us 0, which later results in no zoom.
+      // if y1 = 0 and y2 = 0.5, the distance is 0.5. subtracting 0.5 from 1 gives us 0.5, which later results in a 100% zoom.
+      const cropSize = 1 - distance(this.crop.crop.y1, this.crop.crop.y2);
+      // Use the crop zoom as a factor to increase the mask size, this zooms the image.
+      imageHeight = increaseValue(maskHeight, cropSize);
       imageWidth = imageHeight * imageAspectRatio;
-      this.imageElement.style.height = `${this.#calculateIncreasedValue(maskHeight, cropSize)}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1 + maskLeft}px`;
     }
@@ -198,6 +190,7 @@ export class UmbImageCropperElement extends LitElement {
     const currentScale = Math.max(currentScaleX, currentScaleY);
 
     this._zoom = inverseLerp(this.minImageScale, this.maxImageScale, currentScale);
+    this.#updateImageScale(0);
   }
 
   async #init() {
