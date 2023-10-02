@@ -24,7 +24,7 @@ export function distance(a: number, b: number): number {
 
 export function increaseValue(startValue: number, increaseFactor: number): number {
   if (increaseFactor < 0 || increaseFactor >= 1) {
-    throw new Error("Increase factor must be between 0 (inclusive) and 1 (exclusive)");
+    throw new Error("Increase factor must be between 0 (inclusive) and 1 (inclusive)");
   }
 
   return startValue / (1 - increaseFactor);
