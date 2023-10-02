@@ -22,7 +22,7 @@ export class UmbImageCropperElement extends LitElement {
     this.#updateImageScale(delta);
   }
 
-  @state() private _viewportPadding = 50;
+  @state() private _viewportPadding = 100;
   @state() private _maxScaleFactor = 4;
   @state() private _zoom = 0;
 
@@ -105,12 +105,13 @@ export class UmbImageCropperElement extends LitElement {
 
     if (cropAspectRatio > viewportAspectRatio) {
       maskWidth = viewportWidth - this._viewportPadding * 2;
-      maskHeight = (viewportWidth - this._viewportPadding * 2) / cropAspectRatio;
+      maskHeight = maskWidth * cropAspectRatio;
     } else {
       maskHeight = viewportHeight - this._viewportPadding * 2;
-      maskWidth = (viewportHeight - this._viewportPadding * 2) * cropAspectRatio;
+      maskWidth = maskHeight * cropAspectRatio;
     }
 
+    // Center the mask within the viewport
     const maskLeft = (viewportWidth - maskWidth) / 2;
     const maskTop = (viewportHeight - maskHeight) / 2;
 
@@ -120,25 +121,19 @@ export class UmbImageCropperElement extends LitElement {
     this.maskElement.style.top = `${maskTop}px`;
 
     if (cropAspectRatio > 1) {
-      // Calculate the distance between the crop points so we can calculate the zoom level
-      // if x1 = 0 and x2 = 1, the distance is 1. subtracting 1 from 1 gives us 0, which later results in no zoom.
-      // if x1 = 0 and x2 = 0.5, the distance is 0.5. subtracting 0.5 from 1 gives us 0.5, which later results in a 100% zoom.
-      const cropZoom = 1 - distance(this.crop.crop.x1, this.crop.crop.x2);
-      // Use the crop zoom as a factor to increase the mask size, this zooms the image.
-      imageWidth = increaseValue(maskWidth, cropZoom);
-      imageHeight = imageWidth / imageAspectRatio;
-      this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
+      const cropAmount = this.crop.crop.x1 + this.crop.crop.x2;
+      // Use the cropAmount as a factor to increase the mask size, this zooms the image.
+      imageWidth = increaseValue(maskWidth, cropAmount);
+      imageHeight = imageWidth * imageAspectRatio;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1 + maskLeft}px`;
+      this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
     } else {
-      // Calculate the distance between the crop points so we can calculate the zoom level
-      // if y1 = 0 and y2 = 1, the distance is 1. subtracting 1 from 1 gives us 0, which later results in no zoom.
-      // if y1 = 0 and y2 = 0.5, the distance is 0.5. subtracting 0.5 from 1 gives us 0.5, which later results in a 100% zoom.
-      const cropSize = 1 - distance(this.crop.crop.y1, this.crop.crop.y2);
+      const cropAmount = this.crop.crop.y1 + this.crop.crop.y2;
       // Use the crop zoom as a factor to increase the mask size, this zooms the image.
-      imageHeight = increaseValue(maskHeight, cropSize);
+      imageHeight = increaseValue(maskHeight, cropAmount);
       imageWidth = imageHeight * imageAspectRatio;
-      this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1 + maskLeft}px`;
+      this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1 + maskTop}px`;
     }
 
     // Calculate the scaling factors to fill the mask area while preserving aspect ratio
@@ -152,9 +147,11 @@ export class UmbImageCropperElement extends LitElement {
     const currentScaleY = imageHeight / this.imageElement.naturalHeight;
     const currentScale = Math.max(currentScaleX, currentScaleY);
 
+    this.imageElement.style.width = `${imageWidth}px`;
+    this.imageElement.style.height = `${imageHeight}px`;
+
     //Calculate the zoom level based on the current scale
     this._zoom = inverseLerp(this.#minImageScale, this.#maxImageScale, currentScale);
-    this.#updateImageScale(0);
   }
 
   // async #init_OLD() {
@@ -270,22 +267,15 @@ export class UmbImageCropperElement extends LitElement {
     this.imageElement.style.left = `${left}px`;
     this.imageElement.style.top = `${top}px`;
 
-    const test = this.calculateCropCoordinates();
+    const { x1, x2, y1, y2 } = this.calculateCropCoordinates();
 
-    console.log(test);
-
-    // this.dispatchEvent(
-    //   new CustomEvent("change", {
-    //     detail: {
-    //       crop: {
-    //         x1: this.#toLocalPosition(maskRect.left, 0).x / imageWidth,
-    //         x2: this.#toLocalPosition(maskRect.left + maskWidth, 0).x / imageWidth,
-    //         y1: this.#toLocalPosition(0, maskRect.top).y / imageHeight,
-    //         y2: this.#toLocalPosition(0, maskRect.top + maskHeight).y / imageHeight,
-    //       },
-    //     },
-    //   })
-    // );
+    this.dispatchEvent(
+      new CustomEvent("change", {
+        detail: {
+          crop: { x1, x2, y1, y2 },
+        },
+      })
+    );
   }
 
   #onSliderUpdate(event: InputEvent) {
@@ -341,7 +331,7 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   calculateCropCoordinates(): { x1: number; x2: number; y1: number; y2: number } {
-    const cropCoordinates = { x1: 0, x2: 0, y1: 0, y2: 0 };
+    const cropCoordinates = { x1: 0, y1: 0, x2: 0, y2: 0 };
 
     const mask = this.maskElement.getBoundingClientRect();
     const image = this.imageElement.getBoundingClientRect();

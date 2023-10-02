@@ -41,17 +41,18 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
     if (cropAspectRatio > 1) {
       imageContainerWidth = imageContainerWidth;
-      imageContainerHeight = imageContainerWidth / cropAspectRatio;
-      const cropSize = 1 - distance(this.crop.crop.x1, this.crop.crop.x2);
+      imageContainerHeight = imageContainerWidth * cropAspectRatio;
+      const cropSize = this.crop.crop.x1 + this.crop.crop.x2;
       imageWidth = increaseValue(imageContainerWidth, cropSize);
-      imageHeight = imageWidth / imageAspectRatio;
+      imageHeight = imageWidth * imageAspectRatio;
       this.imageElement.style.width = `${increaseValue(imageContainerWidth, cropSize)}px`;
       this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1}px`;
       this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1}px`;
     } else {
       imageContainerWidth = imageContainerHeight * cropAspectRatio;
       imageContainerHeight = imageContainerHeight;
-      const cropSize = 1 - distance(this.crop.crop.y1, this.crop.crop.y2);
+      const cropSize = this.crop.crop.y1 + this.crop.crop.y2;
+
       imageHeight = increaseValue(imageContainerHeight, cropSize);
       imageWidth = imageHeight * imageAspectRatio;
       this.imageElement.style.height = `${increaseValue(imageContainerHeight, cropSize)}px`;
@@ -60,19 +61,6 @@ export class UmbImageCropperPreviewElement extends LitElement {
     }
     this.imageContainerElement.style.width = `${imageContainerWidth}px`;
     this.imageContainerElement.style.height = `${imageContainerHeight}px`;
-
-    // this.imageElement.style.top = `${-imageContainerHeight * this.crop.crop.y1}px`;
-    // this.imageElement.style.left = `${-imageContainerWidth * this.crop.crop.x1}px`;
-
-    // const top = 0 - this.crop.crop.y1 * imageHeight;
-    // const right = imageContainerWidth - this.crop.crop.x2 * imageWidth;
-    // const left = 0 - this.crop.crop.x1 * imageWidth;
-    // const bottom = imageContainerHeight - this.crop.crop.y2 * imageHeight;
-
-    // this.imageElement.style.top = `${top}px`;
-    // this.imageElement.style.left = `${left}px`;
-    // this.imageElement.style.right = `${right}px`;
-    // this.imageElement.style.bottom = `${bottom}px`;
   }
 
   render() {

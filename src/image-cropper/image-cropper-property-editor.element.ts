@@ -20,6 +20,48 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
   crops: Array<UmbImageCropperCrop> = [
     {
+      name: "Almost Bot Left",
+      dimensions: {
+        width: 1000,
+        height: 1000,
+      },
+      crop: {
+        x1: 0.04113924050632909,
+        y1: 0.32154746835443077,
+        x2: 0.3120537974683548,
+        y2: 0.031645569620253146,
+      },
+      focalPoint: this.focalPoint,
+    },
+    {
+      name: "Test",
+      dimensions: {
+        width: 1000,
+        height: 1000,
+      },
+      crop: {
+        x1: 0.3086962025316458,
+        y1: 0.04746835443037985,
+        x2: 0.04449683544303807,
+        y2: 0.305724683544304,
+      },
+      focalPoint: this.focalPoint,
+    },
+    {
+      name: "Test2",
+      dimensions: {
+        width: 1000,
+        height: 1000,
+      },
+      crop: {
+        x1: 0.3531930379746837,
+        y1: 0,
+        x2: 0,
+        y2: 0.3531930379746837,
+      },
+      focalPoint: this.focalPoint,
+    },
+    {
       name: "TopLeft",
       dimensions: {
         width: 1000,
@@ -56,8 +98,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       crop: {
         x1: 0,
         y1: 0,
-        x2: 1,
-        y2: 1,
+        x2: 0,
+        y2: 0,
       },
       focalPoint: this.focalPoint,
     },
@@ -70,8 +112,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       crop: {
         x1: 0,
         y1: 0,
-        x2: 1,
-        y2: 1,
+        x2: 0,
+        y2: 0,
       },
       focalPoint: this.focalPoint,
     },
@@ -84,8 +126,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       crop: {
         x1: 0,
         y1: 0,
-        x2: 1,
-        y2: 1,
+        x2: 0,
+        y2: 0,
       },
       focalPoint: this.focalPoint,
     },
@@ -98,15 +140,15 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       crop: {
         x1: 0,
         y1: 0,
-        x2: 1,
-        y2: 1,
+        x2: 0,
+        y2: 0,
       },
       focalPoint: this.focalPoint,
     },
   ];
 
   @state()
-  currentCrop = this.crops[1];
+  currentCrop = this.crops[0];
 
   #onCropClick(crop: any) {
     this.currentCrop = crop;
@@ -116,7 +158,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   #onCropChange(event: CustomEvent) {
-    console.log(event.detail);
+    console.log(event.detail.crop, this.currentCrop.crop);
   }
 
   render() {
