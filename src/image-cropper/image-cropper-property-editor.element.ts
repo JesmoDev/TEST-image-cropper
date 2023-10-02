@@ -115,6 +115,10 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     this.requestUpdate();
   }
 
+  #onCropChange(event: CustomEvent) {
+    console.log(event.detail);
+  }
+
   render() {
     return html`
       <div id="main">
@@ -126,7 +130,9 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   #renderMain() {
-    return this.showCrop ? html`<umb-image-cropper .crop=${this.currentCrop}></umb-image-cropper>` : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
+    return this.showCrop
+      ? html`<umb-image-cropper @change=${this.#onCropChange} .crop=${this.currentCrop}></umb-image-cropper>`
+      : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {

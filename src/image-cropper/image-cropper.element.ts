@@ -269,6 +269,23 @@ export class UmbImageCropperElement extends LitElement {
 
     this.imageElement.style.left = `${left}px`;
     this.imageElement.style.top = `${top}px`;
+
+    const test = this.calculateCropCoordinates();
+
+    console.log(test);
+
+    // this.dispatchEvent(
+    //   new CustomEvent("change", {
+    //     detail: {
+    //       crop: {
+    //         x1: this.#toLocalPosition(maskRect.left, 0).x / imageWidth,
+    //         x2: this.#toLocalPosition(maskRect.left + maskWidth, 0).x / imageWidth,
+    //         y1: this.#toLocalPosition(0, maskRect.top).y / imageHeight,
+    //         y2: this.#toLocalPosition(0, maskRect.top + maskHeight).y / imageHeight,
+    //       },
+    //     },
+    //   })
+    // );
   }
 
   #onSliderUpdate(event: InputEvent) {
@@ -321,6 +338,20 @@ export class UmbImageCropperElement extends LitElement {
       x: x - viewportRect.left,
       y: y - viewportRect.top,
     };
+  }
+
+  calculateCropCoordinates(): { x1: number; x2: number; y1: number; y2: number } {
+    const cropCoordinates = { x1: 0, x2: 0, y1: 0, y2: 0 };
+
+    const mask = this.maskElement.getBoundingClientRect();
+    const image = this.imageElement.getBoundingClientRect();
+
+    cropCoordinates.x1 = (mask.left - image.left) / image.width;
+    cropCoordinates.x2 = Math.abs((mask.right - image.right) / image.width);
+    cropCoordinates.y1 = (mask.top - image.top) / image.height;
+    cropCoordinates.y2 = Math.abs((mask.bottom - image.bottom) / image.height);
+
+    return cropCoordinates;
   }
 
   render() {
