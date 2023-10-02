@@ -101,12 +101,14 @@ export class UmbImageCropperPreviewElement extends LitElement {
       width: 100%;
       aspect-ratio: 1;
       overflow: hidden;
-      outline: 1px solid black;
+      /* outline: 1px solid black; */
       position: relative;
       overflow: hidden;
+      margin: auto;
     }
     #name {
       font-weight: bold;
+      margin-top: 8px;
     }
     #dimensions {
       font-size: 0.8em;

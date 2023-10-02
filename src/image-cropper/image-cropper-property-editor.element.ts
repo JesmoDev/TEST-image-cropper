@@ -152,7 +152,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       display: flex;
       flex-direction: column;
       gap: 8px;
-      width: 150px;
+      width: 120px;
     }
   `;
 }
