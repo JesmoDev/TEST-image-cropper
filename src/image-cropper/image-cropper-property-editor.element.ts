@@ -183,7 +183,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   #renderMain() {
     return this.currentCrop
       ? html`<umb-image-cropper @change=${this.#onCropChange} .src=${this.src} .focalPoint=${this.focalPoint} .value=${this.currentCrop}></umb-image-cropper>`
-      : html`<umb-image-cropper-focus-setter @change=${this.#onFocalPointChange} .src=${this.src}></umb-image-cropper-focus-setter>`;
+      : html`<umb-image-cropper-focus-setter @change=${this.#onFocalPointChange} .focalPoint=${this.focalPoint} .src=${this.src}></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {

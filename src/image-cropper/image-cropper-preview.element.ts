@@ -75,6 +75,8 @@ export class UmbImageCropperPreviewElement extends LitElement {
         imageTop = -imageHeight * this.crop.coordinates.y1;
         imageLeft = -imageWidth * this.crop.coordinates.x1;
       }
+      this.imageElement.style.top = `${imageTop}px`;
+      this.imageElement.style.left = `${imageLeft}px`;
     } else {
       // Set the image size to fill the imageContainer while preserving aspect ratio
       if (cropAspectRatio > 1) {
@@ -85,33 +87,38 @@ export class UmbImageCropperPreviewElement extends LitElement {
         imageWidth = imageHeight * imageAspectRatio;
       }
 
-      // position image using focal point
-      const focalPoint = this.#focalPoint;
-      imageTop = lerp(0, imageContainerHeight - imageHeight, focalPoint.top);
-      imageLeft = lerp(0, imageContainerWidth - imageWidth, focalPoint.left);
+      this.#onFocalPointUpdated(imageWidth, imageHeight, imageContainerWidth, imageContainerHeight);
     }
-
-    this.imageElement.style.width = `${imageWidth}px`;
-    this.imageElement.style.height = `${imageHeight}px`;
-    this.imageElement.style.top = `${imageTop}px`;
-    this.imageElement.style.left = `${imageLeft}px`;
 
     this.imageContainerElement.style.width = `${imageContainerWidth}px`;
     this.imageContainerElement.style.height = `${imageContainerHeight}px`;
+
+    this.imageElement.style.width = `${imageWidth}px`;
+    this.imageElement.style.height = `${imageHeight}px`;
   }
 
-  #onFocalPointUpdated() {
+  #onFocalPointUpdated(imageWidth?: number, imageHeight?: number, containerWidth?: number, containerHeight?: number) {
     if (!this.crop) return;
     if (!this.imageElement || !this.imageContainerElement) return;
-
     if (this.crop.coordinates) return;
 
-    const image = this.imageElement.getBoundingClientRect();
-    const container = this.imageContainerElement.getBoundingClientRect();
-
-    const focalPoint = this.#focalPoint;
-    const imageTop = clamp(lerp(0, image.height, focalPoint.top), 0, container.height - image.height);
-    const imageLeft = lerp(0, container.width - image.width, focalPoint.left);
+    if (!imageWidth || !imageHeight) {
+      const image = this.imageElement.getBoundingClientRect();
+      imageWidth = image.width;
+      imageHeight = image.height;
+    }
+    if (!containerWidth || !containerHeight) {
+      const container = this.imageContainerElement.getBoundingClientRect();
+      containerWidth = container.width;
+      containerHeight = container.height;
+    }
+    console.log(imageWidth, imageHeight, containerWidth, containerHeight);
+    // position image so that its center is at the focal point
+    let imageLeft = containerWidth / 2 - imageWidth * this.#focalPoint.left;
+    let imageTop = containerHeight / 2 - imageHeight * this.#focalPoint.top;
+    // clamp
+    imageLeft = clamp(imageLeft, containerWidth - imageWidth, 0);
+    imageTop = clamp(imageTop, containerHeight - imageHeight, 0);
 
     this.imageElement.style.top = `${imageTop}px`;
     this.imageElement.style.left = `${imageLeft}px`;

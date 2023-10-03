@@ -1,4 +1,4 @@
-import { LitElement, css, html, nothing } from "lit";
+import { LitElement, PropertyValueMap, css, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { clamp } from "./mathUtils";
 
@@ -8,6 +8,7 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
   @query("#focal-point") focalPointElement!: HTMLImageElement;
 
   @property({ type: String }) src?: string;
+  @property({ attribute: false }) focalPoint = { left: 0.5, top: 0.5 };
 
   connectedCallback() {
     super.connectedCallback();
@@ -17,6 +18,12 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
   disconnectedCallback() {
     super.disconnectedCallback();
     this.#removeEventListeners();
+  }
+
+  protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    super.firstUpdated(_changedProperties);
+    this.focalPointElement.style.left = `calc(${this.focalPoint.left * 100}% - 6px)`;
+    this.focalPointElement.style.top = `calc(${this.focalPoint.top * 100}% - 6px)`;
   }
 
   async #addEventListeners() {
