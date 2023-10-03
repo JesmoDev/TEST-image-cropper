@@ -23,8 +23,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         height: 1000,
         coordinates: {
           x1: 0.04113924050632909,
-          y1: 0.32154746835443077,
           x2: 0.3120537974683548,
+          y1: 0.32154746835443077,
           y2: 0.031645569620253146,
         },
       },
@@ -34,8 +34,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         height: 1000,
         coordinates: {
           x1: 0.3086962025316458,
-          y1: 0.04746835443037985,
           x2: 0.04449683544303807,
+          y1: 0.04746835443037985,
           y2: 0.305724683544304,
         },
       },
@@ -45,8 +45,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         height: 1000,
         coordinates: {
           x1: 0.3531930379746837,
-          y1: 0,
           x2: 0,
+          y1: 0,
           y2: 0.3531930379746837,
         },
       },
@@ -56,8 +56,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         height: 1000,
         coordinates: {
           x1: 0,
-          y1: 0,
           x2: 0.5,
+          y1: 0,
           y2: 0.5,
         },
       },
@@ -67,8 +67,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         height: 1000,
         coordinates: {
           x1: 0.5,
-          y1: 0.5,
           x2: 0,
+          y1: 0.5,
           y2: 0,
         },
       },
@@ -98,28 +98,39 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   currentCrop = this.value?.crops[0];
 
-  #onCropClick(crop: any) {
-    this.currentCrop = crop;
+  async #onCropClick(crop: any) {
+    const index = this.value?.crops.findIndex((c) => c.alias === crop.alias);
 
+    this.currentCrop = undefined;
+    this.requestUpdate();
+    await this.updateComplete;
+    this.currentCrop = this.value?.crops[index!];
     this.requestUpdate();
   }
 
-  #onCropChange(event: CustomEvent) {}
+  #onCropChange(event: CustomEvent) {
+    if (!this.currentCrop) return;
+
+    this.currentCrop.coordinates = event.detail.crop;
+    this.requestUpdate();
+  }
 
   #onSave = () => {
-    if (!this.value) return;
-    const temp = this.value.crops;
+    console.log("asd");
 
-    // TODO: Fix this
-    // WHY DO I HAVE TO DO THIS!??!?!?
-    this.value.crops = [];
+    // if (!this.value) return;
+    // const temp = this.value;
 
-    this.requestUpdate();
-    requestAnimationFrame(() => {
-      if (!this.value) return;
-      this.value.crops = temp;
-      this.requestUpdate();
-    });
+    // // TODO: Fix this
+    // // WHY DO I HAVE TO DO THIS!??!?!?
+    // this.value = undefined;
+
+    // this.requestUpdate();
+    // requestAnimationFrame(() => {
+    //   if (!this.value) return;
+    //   this.value = temp;
+    //   this.requestUpdate();
+    // });
   };
 
   render() {
@@ -129,7 +140,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         <button @click=${this.#onSave} style="margin-top: 8px">Save</button>
       </div>
       <div id="side">${this.#renderSide()}</div>
-      <div style="position: absolute; bottom: 20px;">
+      <div style="position: absolute; top: 0; left: 0">
         <pre>${JSON.stringify(this.value, null, 2)}</pre>
       </div>
     `;
@@ -149,7 +160,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   static styles = css`
     :host {
       display: flex;
-      height: 600px;
+      height: 100%;
       width: 100%;
       box-sizing: border-box;
       gap: 8px;
@@ -160,6 +171,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     }
     #main {
       flex-grow: 1;
+      height: 600px;
     }
     #side {
       display: flex;
