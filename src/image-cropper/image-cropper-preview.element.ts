@@ -112,7 +112,6 @@ export class UmbImageCropperPreviewElement extends LitElement {
       containerWidth = container.width;
       containerHeight = container.height;
     }
-    console.log(imageWidth, imageHeight, containerWidth, containerHeight);
     // position image so that its center is at the focal point
     let imageLeft = containerWidth / 2 - imageWidth * this.#focalPoint.left;
     let imageTop = containerHeight / 2 - imageHeight * this.#focalPoint.top;
