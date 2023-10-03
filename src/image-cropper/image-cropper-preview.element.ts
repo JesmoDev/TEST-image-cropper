@@ -4,7 +4,7 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
-import { distance, increaseValue, lerp } from "./mathUtils";
+import { clamp, distance, increaseValue, lerp } from "./mathUtils";
 
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
@@ -18,7 +18,15 @@ export class UmbImageCropperPreviewElement extends LitElement {
   src: string = "";
 
   @property({ attribute: false })
-  focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
+  get focalPoint() {
+    return this.#focalPoint;
+  }
+  set focalPoint(value) {
+    this.#focalPoint = value;
+    this.#onFocalPointUpdated();
+  }
+
+  #focalPoint = { left: 0.5, top: 0.5 };
 
   connectedCallback() {
     super.connectedCallback();
@@ -78,7 +86,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
       }
 
       // position image using focal point
-      const focalPoint = this.focalPoint;
+      const focalPoint = this.#focalPoint;
       imageTop = lerp(0, imageContainerHeight - imageHeight, focalPoint.top);
       imageLeft = lerp(0, imageContainerWidth - imageWidth, focalPoint.left);
     }
@@ -90,6 +98,23 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
     this.imageContainerElement.style.width = `${imageContainerWidth}px`;
     this.imageContainerElement.style.height = `${imageContainerHeight}px`;
+  }
+
+  #onFocalPointUpdated() {
+    if (!this.crop) return;
+    if (!this.imageElement || !this.imageContainerElement) return;
+
+    if (this.crop.coordinates) return;
+
+    const image = this.imageElement.getBoundingClientRect();
+    const container = this.imageContainerElement.getBoundingClientRect();
+
+    const focalPoint = this.#focalPoint;
+    const imageTop = clamp(lerp(0, image.height, focalPoint.top), 0, container.height - image.height);
+    const imageLeft = lerp(0, container.width - image.width, focalPoint.left);
+
+    this.imageElement.style.top = `${imageTop}px`;
+    this.imageElement.style.left = `${imageLeft}px`;
   }
 
   render() {
@@ -132,6 +157,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
     }
     #image {
       position: absolute;
+      pointer-events: none;
     }
   `;
 }

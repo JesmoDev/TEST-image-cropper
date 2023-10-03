@@ -1,4 +1,4 @@
-import { LitElement, PropertyValueMap, css, html } from "lit";
+import { LitElement, PropertyValueMap, css, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
 import { clamp, increaseValue, inverseLerp, lerp } from "./mathUtils";
@@ -18,6 +18,9 @@ export class UmbImageCropperElement extends LitElement {
     const delta = value - this._zoom;
     this.#updateImageScale(delta);
   }
+
+  @property({ type: String })
+  src?: string = "";
 
   @property({ attribute: false })
   focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
@@ -298,9 +301,11 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   render() {
+    if (!this.src) return nothing;
+
     return html`
       <div id="viewport">
-        <img id="image" src="src/assets/TEST 4.png" alt="" />
+        <img id="image" src=${this.src} alt="" />
         <div id="mask"></div>
       </div>
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />

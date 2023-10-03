@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 
 import "./image-cropper.element";
@@ -10,8 +10,20 @@ import { UmbImageCropperPropertyEditorValue } from ".";
 @customElement("umb-image-cropper-property-editor")
 export class UmbImageCropperPropertyEditorElement extends LitElement {
   @property({ type: Object, attribute: false })
-  value?: UmbImageCropperPropertyEditorValue = {
-    focalPoint: { left: 0.5, top: 0.25 },
+  get value() {
+    return this.#value;
+  }
+  set value(value) {
+    this.crops = value?.crops ?? [];
+    this.focalPoint = value?.focalPoint ?? { left: 0.5, top: 0.5 };
+    this.src = value?.src ?? "";
+    this.#value = value;
+
+    this.requestUpdate();
+  }
+
+  #value? = {
+    focalPoint: { left: 0.5, top: 0.5 },
     src: "src/assets/TEST 4.png",
     crops: [
       {
@@ -93,7 +105,24 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   };
 
   @state()
-  currentCrop = this.value?.crops[5];
+  currentCrop?: UmbImageCropperPropertyEditorValue["crops"][number];
+
+  @state()
+  crops: UmbImageCropperPropertyEditorValue["crops"] = [];
+
+  @state()
+  focalPoint: UmbImageCropperPropertyEditorValue["focalPoint"] = { left: 0.5, top: 0.5 };
+
+  @state()
+  src: UmbImageCropperPropertyEditorValue["src"] = "";
+
+  /**
+   *
+   */
+  constructor() {
+    super();
+    this.value = this.#value;
+  }
 
   async #onCropClick(crop: any) {
     const index = this.value?.crops.findIndex((c) => c.alias === crop.alias);
@@ -121,15 +150,28 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     this.requestUpdate();
   }
 
+  async #onFocalPointChange(event: CustomEvent) {
+    this.focalPoint = event.detail;
+    this.requestUpdate();
+  }
+
   #onSave = () => {
     //TODO Save
+  };
+
+  #onCancel = () => {
+    this.currentCrop = undefined;
+    this.requestUpdate();
   };
 
   render() {
     return html`
       <div id="main">
         ${this.#renderMain()}
-        <button @click=${this.#onSave} style="margin-top: 8px">Save</button>
+        <div id="actions">
+          <button @click=${this.#onSave} style="margin-top: 8px">Save</button>
+          <button @click=${this.#onCancel} style="margin-top: 8px">Cancel</button>
+        </div>
       </div>
       <div id="side">${this.#renderSide()}</div>
       <div style="position: absolute; top: 0; left: 0">
@@ -140,16 +182,16 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
   #renderMain() {
     return this.currentCrop
-      ? html`<umb-image-cropper @change=${this.#onCropChange} .focalPoint=${this.value!.focalPoint} .value=${this.currentCrop}></umb-image-cropper>`
-      : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
+      ? html`<umb-image-cropper @change=${this.#onCropChange} .src=${this.src} .focalPoint=${this.focalPoint} .value=${this.currentCrop}></umb-image-cropper>`
+      : html`<umb-image-cropper-focus-setter @change=${this.#onFocalPointChange} .src=${this.src}></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {
-    if (!this.value || !this.value?.crops) return;
+    if (!this.value || !this.crops) return;
 
     return repeat(
       this.value.crops,
-      (crop) => html` <umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .focalPoint=${this.value!.focalPoint} .src=${this.value!.src}></umb-image-cropper-preview>`
+      (crop) => html` <umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .focalPoint=${this.focalPoint} .src=${this.src}></umb-image-cropper-preview>`
     );
   }
   static styles = css`
