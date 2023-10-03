@@ -15,7 +15,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
   crop?: UmbImageCropperCrop;
 
   @property({ type: String, attribute: false })
-  image: string = "";
+  src: string = "";
 
   connectedCallback() {
     super.connectedCallback();
@@ -24,6 +24,8 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
   async #init() {
     if (!this.crop) return;
+
+    if (!this.crop.coordinates) return; //TODO: Use focus point if no coordinate
 
     await this.updateComplete;
 
@@ -36,28 +38,28 @@ export class UmbImageCropperPreviewElement extends LitElement {
     let imageContainerHeight = imageContainerRect.height;
     let imageWidth = 0;
     let imageHeight = 0;
-    const cropAspectRatio = this.crop.dimensions.width / this.crop.dimensions.height;
+    const cropAspectRatio = this.crop.width / this.crop.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
     if (cropAspectRatio > 1) {
       imageContainerWidth = imageContainerWidth;
       imageContainerHeight = imageContainerWidth / cropAspectRatio;
-      const cropSize = this.crop.crop.x1 + this.crop.crop.x2;
+      const cropSize = this.crop.coordinates.x1 + this.crop.coordinates.x2;
       imageWidth = increaseValue(imageContainerWidth, cropSize);
       imageHeight = imageWidth / imageAspectRatio;
       this.imageElement.style.width = `${increaseValue(imageContainerWidth, cropSize)}px`;
-      this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1}px`;
-      this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1}px`;
+      this.imageElement.style.top = `${-imageHeight * this.crop.coordinates.y1}px`;
+      this.imageElement.style.left = `${-imageWidth * this.crop.coordinates.x1}px`;
     } else {
       imageContainerWidth = imageContainerHeight * cropAspectRatio;
       imageContainerHeight = imageContainerHeight;
-      const cropSize = this.crop.crop.y1 + this.crop.crop.y2;
+      const cropSize = this.crop.coordinates.y1 + this.crop.coordinates.y2;
 
       imageHeight = increaseValue(imageContainerHeight, cropSize);
       imageWidth = imageHeight * imageAspectRatio;
       this.imageElement.style.height = `${increaseValue(imageContainerHeight, cropSize)}px`;
-      this.imageElement.style.top = `${-imageHeight * this.crop.crop.y1}px`;
-      this.imageElement.style.left = `${-imageWidth * this.crop.crop.x1}px`;
+      this.imageElement.style.top = `${-imageHeight * this.crop.coordinates.y1}px`;
+      this.imageElement.style.left = `${-imageWidth * this.crop.coordinates.x1}px`;
     }
     this.imageContainerElement.style.width = `${imageContainerWidth}px`;
     this.imageContainerElement.style.height = `${imageContainerHeight}px`;
@@ -70,10 +72,10 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
     return html`
       <div id="image-container">
-        <img id="image" src=${this.image} alt="image" />
+        <img id="image" src=${this.src} alt="image" />
       </div>
-      <span id="name">${this.crop.name}</span>
-      <span id="dimensions">${this.crop.dimensions.width} x ${this.crop.dimensions.height}</span>
+      <span id="name">${this.crop.alias}</span>
+      <span id="dimensions">${this.crop.width} x ${this.crop.height}</span>
     `;
   }
   static styles = css`

@@ -1,17 +1,27 @@
 export type UmbImageCropperCrop = {
-  name: string;
-  dimensions: {
-    width: number;
-    height: number;
-  };
-  crop: {
+  alias: string;
+  coordinates?: {
     x1: number;
-    y1: number;
     x2: number;
+    y1: number;
     y2: number;
   };
-  focalPoint: {
-    x: number;
-    y: number;
-  };
+  height: number;
+  width: number;
+};
+
+export type UmbImageCropperPropertyEditorValue = {
+  crops: Array<{
+    alias: string;
+    coordinates?: {
+      x1: number;
+      x2: number;
+      y1: number;
+      y2: number;
+    };
+    height: number;
+    width: number;
+  }>;
+  focalPoint: { left: number; top: number };
+  src: string;
 };

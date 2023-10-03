@@ -5,181 +5,119 @@ import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
 import "./image-cropper-preview.element";
 import { repeat } from "lit/directives/repeat.js";
-import { UmbImageCropperCrop } from ".";
+import { UmbImageCropperPropertyEditorValue } from ".";
 
 @customElement("umb-image-cropper-property-editor")
 export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   focalPoint = { x: 0.5, y: 0.5 };
 
-  @state()
-  showCrop = true;
-
-  @state()
-  image = "src/assets/TEST 4.png";
-
-  @state()
-  crops: Array<UmbImageCropperCrop> = [
-    {
-      name: "Almost Bot Left",
-      dimensions: {
+  @property({ type: Object, attribute: false })
+  value?: UmbImageCropperPropertyEditorValue = {
+    focalPoint: { left: 0.5, top: 0.5 },
+    src: "src/assets/TEST 4.png",
+    crops: [
+      {
+        alias: "Almost Bot Left",
         width: 1000,
         height: 1000,
+        coordinates: {
+          x1: 0.04113924050632909,
+          y1: 0.32154746835443077,
+          x2: 0.3120537974683548,
+          y2: 0.031645569620253146,
+        },
       },
-      crop: {
-        x1: 0.04113924050632909,
-        y1: 0.32154746835443077,
-        x2: 0.3120537974683548,
-        y2: 0.031645569620253146,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "Test",
-      dimensions: {
+      {
+        alias: "Test",
         width: 1000,
         height: 1000,
+        coordinates: {
+          x1: 0.3086962025316458,
+          y1: 0.04746835443037985,
+          x2: 0.04449683544303807,
+          y2: 0.305724683544304,
+        },
       },
-      crop: {
-        x1: 0.3086962025316458,
-        y1: 0.04746835443037985,
-        x2: 0.04449683544303807,
-        y2: 0.305724683544304,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "Test2",
-      dimensions: {
+      {
+        alias: "Test2",
         width: 1000,
         height: 1000,
+        coordinates: {
+          x1: 0.3531930379746837,
+          y1: 0,
+          x2: 0,
+          y2: 0.3531930379746837,
+        },
       },
-      crop: {
-        x1: 0.3531930379746837,
-        y1: 0,
-        x2: 0,
-        y2: 0.3531930379746837,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "TopLeft",
-      dimensions: {
+      {
+        alias: "TopLeft",
         width: 1000,
         height: 1000,
+        coordinates: {
+          x1: 0,
+          y1: 0,
+          x2: 0.5,
+          y2: 0.5,
+        },
       },
-      crop: {
-        x1: 0,
-        y1: 0,
-        x2: 0.5,
-        y2: 0.5,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "bottomRight",
-      dimensions: {
+      {
+        alias: "bottomRight",
         width: 1000,
         height: 1000,
+        coordinates: {
+          x1: 0.5,
+          y1: 0.5,
+          x2: 0,
+          y2: 0,
+        },
       },
-      crop: {
-        x1: 0.5,
-        y1: 0.5,
-        x2: 0,
-        y2: 0,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "Desktop",
-      dimensions: {
+      {
+        alias: "Desktop",
         width: 1920,
         height: 1080,
       },
-      crop: {
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 0,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "Banner",
-      dimensions: {
+      {
+        alias: "Banner",
         width: 1920,
         height: 300,
       },
-      crop: {
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 0,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "Tablet",
-      dimensions: {
+      {
+        alias: "Tablet",
         width: 600,
         height: 800,
       },
-      crop: {
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 0,
-      },
-      focalPoint: this.focalPoint,
-    },
-    {
-      name: "Mobile",
-      dimensions: {
+      {
+        alias: "Mobile",
         width: 400,
         height: 800,
       },
-      crop: {
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 0,
-      },
-      focalPoint: this.focalPoint,
-    },
-  ];
+    ],
+  };
 
   @state()
-  currentCrop = this.crops[0];
-
-  #currentCropState = {
-    x1: 0,
-    y1: 0,
-    x2: 0,
-    y2: 0,
-  };
+  currentCrop = this.value?.crops[0];
 
   #onCropClick(crop: any) {
     this.currentCrop = crop;
-    this.showCrop = true;
 
     this.requestUpdate();
   }
 
-  #onCropChange(event: CustomEvent) {
-    this.#currentCropState = event.detail.crop;
-  }
+  #onCropChange(event: CustomEvent) {}
 
   #onSave = () => {
-    this.currentCrop.crop = this.#currentCropState;
-
-    const temp = this.crops;
+    if (!this.value) return;
+    const temp = this.value.crops;
 
     // TODO: Fix this
     // WHY DO I HAVE TO DO THIS!??!?!?
-    this.crops = [];
+    this.value.crops = [];
+
     this.requestUpdate();
     requestAnimationFrame(() => {
-      this.crops = temp;
+      if (!this.value) return;
+      this.value.crops = temp;
       this.requestUpdate();
     });
   };
@@ -191,18 +129,22 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         <button @click=${this.#onSave} style="margin-top: 8px">Save</button>
       </div>
       <div id="side">${this.#renderSide()}</div>
+      <div style="position: absolute; bottom: 20px;">
+        <pre>${JSON.stringify(this.value, null, 2)}</pre>
+      </div>
     `;
   }
 
   #renderMain() {
-    return this.showCrop
-      ? html`<umb-image-cropper @change=${this.#onCropChange} .crop=${this.currentCrop}></umb-image-cropper>`
+    return this.currentCrop
+      ? html`<umb-image-cropper @change=${this.#onCropChange} .value=${this.currentCrop}></umb-image-cropper>`
       : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {
-    return this.crops.map((crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`);
-    return repeat(this.crops, (crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .image=${this.image}></umb-image-cropper-preview>`);
+    if (!this.value || !this.value?.crops) return;
+
+    return repeat(this.value.crops, (crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .src=${this.value!.src}></umb-image-cropper-preview>`);
   }
   static styles = css`
     :host {
