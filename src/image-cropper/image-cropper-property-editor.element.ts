@@ -105,10 +105,19 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     this.requestUpdate();
   }
 
-  #onCropChange(event: CustomEvent) {
+  async #onCropChange(event: CustomEvent) {
     if (!this.currentCrop) return;
 
     this.currentCrop.coordinates = event.detail.crop;
+
+    if (!this.value?.crops) return;
+
+    const temp = [...this.value.crops];
+
+    this.value.crops = [];
+    this.requestUpdate();
+    await this.updateComplete;
+    this.value.crops = temp;
     this.requestUpdate();
   }
 

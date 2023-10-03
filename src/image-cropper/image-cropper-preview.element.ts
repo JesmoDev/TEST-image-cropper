@@ -3,7 +3,7 @@ import { customElement, property, query, state } from "lit/decorators.js";
 
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
-import { UmbImageCropperCrop } from ".";
+import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
 import { distance, increaseValue } from "./mathUtils";
 
 @customElement("umb-image-cropper-preview")
@@ -16,6 +16,9 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
   @property({ type: String, attribute: false })
   src: string = "";
+
+  @property({ attribute: false })
+  focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
 
   connectedCallback() {
     super.connectedCallback();
@@ -38,6 +41,8 @@ export class UmbImageCropperPreviewElement extends LitElement {
     let imageContainerHeight = imageContainerRect.height;
     let imageWidth = 0;
     let imageHeight = 0;
+    let imageLeft = 0;
+    let imageTop = 0;
     const cropAspectRatio = this.crop.width / this.crop.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
@@ -47,20 +52,24 @@ export class UmbImageCropperPreviewElement extends LitElement {
       const cropSize = this.crop.coordinates.x1 + this.crop.coordinates.x2;
       imageWidth = increaseValue(imageContainerWidth, cropSize);
       imageHeight = imageWidth / imageAspectRatio;
-      this.imageElement.style.width = `${increaseValue(imageContainerWidth, cropSize)}px`;
-      this.imageElement.style.top = `${-imageHeight * this.crop.coordinates.y1}px`;
-      this.imageElement.style.left = `${-imageWidth * this.crop.coordinates.x1}px`;
+      imageTop = -imageHeight * this.crop.coordinates.y1;
+      imageLeft = -imageWidth * this.crop.coordinates.x1;
     } else {
       imageContainerWidth = imageContainerHeight * cropAspectRatio;
       imageContainerHeight = imageContainerHeight;
       const cropSize = this.crop.coordinates.y1 + this.crop.coordinates.y2;
-
       imageHeight = increaseValue(imageContainerHeight, cropSize);
       imageWidth = imageHeight * imageAspectRatio;
-      this.imageElement.style.height = `${increaseValue(imageContainerHeight, cropSize)}px`;
-      this.imageElement.style.top = `${-imageHeight * this.crop.coordinates.y1}px`;
-      this.imageElement.style.left = `${-imageWidth * this.crop.coordinates.x1}px`;
+      imageHeight = increaseValue(imageContainerHeight, cropSize);
+      imageTop = -imageHeight * this.crop.coordinates.y1;
+      imageLeft = -imageWidth * this.crop.coordinates.x1;
     }
+
+    this.imageElement.style.width = `${imageWidth}px`;
+    this.imageElement.style.height = `${imageHeight}px`;
+    this.imageElement.style.top = `${imageTop}px`;
+    this.imageElement.style.left = `${imageLeft}px`;
+
     this.imageContainerElement.style.width = `${imageContainerWidth}px`;
     this.imageContainerElement.style.height = `${imageContainerHeight}px`;
   }

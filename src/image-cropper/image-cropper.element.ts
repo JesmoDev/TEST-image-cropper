@@ -149,7 +149,6 @@ export class UmbImageCropperElement extends LitElement {
       // Set the image size to fill the mask while preserving aspect ratio
       imageWidth = this.imageElement.naturalWidth * this.#minImageScale;
       imageHeight = this.imageElement.naturalHeight * this.#minImageScale;
-
       // position image using focal point
       const focalPoint = this.focalPoint;
       imageTop = lerp(maskTop, maskTop + maskHeight - imageHeight, focalPoint.top);
@@ -218,8 +217,10 @@ export class UmbImageCropperElement extends LitElement {
 
     this.imageElement.style.left = `${left}px`;
     this.imageElement.style.top = `${top}px`;
+  }
 
-    const { x1, x2, y1, y2 } = this.calculateCropCoordinates();
+  #onSave() {
+    const { x1, x2, y1, y2 } = this.#calculateCropCoordinates();
 
     this.dispatchEvent(
       new CustomEvent("change", {
@@ -282,7 +283,7 @@ export class UmbImageCropperElement extends LitElement {
     };
   }
 
-  calculateCropCoordinates(): { x1: number; x2: number; y1: number; y2: number } {
+  #calculateCropCoordinates(): { x1: number; x2: number; y1: number; y2: number } {
     const cropCoordinates = { x1: 0, y1: 0, x2: 0, y2: 0 };
 
     const mask = this.maskElement.getBoundingClientRect();
@@ -303,6 +304,7 @@ export class UmbImageCropperElement extends LitElement {
         <div id="mask"></div>
       </div>
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
+      <button @click=${this.#onSave}>Save Crop</button>
 
       <div style="position: absolute; width: fit-content; height: 100px; bottom: 0;">
         DEBUG: Use mouse position for zoom:
