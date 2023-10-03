@@ -11,7 +11,7 @@ import { UmbImageCropperPropertyEditorValue } from ".";
 export class UmbImageCropperPropertyEditorElement extends LitElement {
   @property({ type: Object, attribute: false })
   value?: UmbImageCropperPropertyEditorValue = {
-    focalPoint: { left: 0.5, top: 1 },
+    focalPoint: { left: 0.5, top: 0.25 },
     src: "src/assets/TEST 4.png",
     crops: [
       {
@@ -140,14 +140,17 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
   #renderMain() {
     return this.currentCrop
-      ? html`<umb-image-cropper @change=${this.#onCropChange} .focalPoint=${this.value?.focalPoint} .value=${this.currentCrop}></umb-image-cropper>`
+      ? html`<umb-image-cropper @change=${this.#onCropChange} .focalPoint=${this.value!.focalPoint} .value=${this.currentCrop}></umb-image-cropper>`
       : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
   }
 
   #renderSide() {
     if (!this.value || !this.value?.crops) return;
 
-    return repeat(this.value.crops, (crop) => html`<umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .src=${this.value!.src}></umb-image-cropper-preview>`);
+    return repeat(
+      this.value.crops,
+      (crop) => html` <umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .focalPoint=${this.value!.focalPoint} .src=${this.value!.src}></umb-image-cropper-preview>`
+    );
   }
   static styles = css`
     :host {

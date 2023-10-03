@@ -4,7 +4,7 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
-import { distance, increaseValue } from "./mathUtils";
+import { distance, increaseValue, lerp } from "./mathUtils";
 
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
@@ -28,8 +28,6 @@ export class UmbImageCropperPreviewElement extends LitElement {
   async #init() {
     if (!this.crop) return;
 
-    if (!this.crop.coordinates) return; //TODO: Use focus point if no coordinate
-
     await this.updateComplete;
 
     if (!this.imageElement.complete) {
@@ -49,20 +47,40 @@ export class UmbImageCropperPreviewElement extends LitElement {
     if (cropAspectRatio > 1) {
       imageContainerWidth = imageContainerWidth;
       imageContainerHeight = imageContainerWidth / cropAspectRatio;
-      const cropSize = this.crop.coordinates.x1 + this.crop.coordinates.x2;
-      imageWidth = increaseValue(imageContainerWidth, cropSize);
-      imageHeight = imageWidth / imageAspectRatio;
-      imageTop = -imageHeight * this.crop.coordinates.y1;
-      imageLeft = -imageWidth * this.crop.coordinates.x1;
     } else {
       imageContainerWidth = imageContainerHeight * cropAspectRatio;
       imageContainerHeight = imageContainerHeight;
-      const cropSize = this.crop.coordinates.y1 + this.crop.coordinates.y2;
-      imageHeight = increaseValue(imageContainerHeight, cropSize);
-      imageWidth = imageHeight * imageAspectRatio;
-      imageHeight = increaseValue(imageContainerHeight, cropSize);
-      imageTop = -imageHeight * this.crop.coordinates.y1;
-      imageLeft = -imageWidth * this.crop.coordinates.x1;
+    }
+
+    if (this.crop.coordinates) {
+      if (cropAspectRatio > 1) {
+        const cropSize = this.crop.coordinates.x1 + this.crop.coordinates.x2;
+        imageWidth = increaseValue(imageContainerWidth, cropSize);
+        imageHeight = imageWidth / imageAspectRatio;
+        imageTop = -imageHeight * this.crop.coordinates.y1;
+        imageLeft = -imageWidth * this.crop.coordinates.x1;
+      } else {
+        const cropSize = this.crop.coordinates.y1 + this.crop.coordinates.y2;
+        imageHeight = increaseValue(imageContainerHeight, cropSize);
+        imageWidth = imageHeight * imageAspectRatio;
+        imageHeight = increaseValue(imageContainerHeight, cropSize);
+        imageTop = -imageHeight * this.crop.coordinates.y1;
+        imageLeft = -imageWidth * this.crop.coordinates.x1;
+      }
+    } else {
+      // Set the image size to fill the imageContainer while preserving aspect ratio
+      if (cropAspectRatio > 1) {
+        imageWidth = imageContainerWidth;
+        imageHeight = imageWidth / imageAspectRatio;
+      } else {
+        imageHeight = imageContainerHeight;
+        imageWidth = imageHeight * imageAspectRatio;
+      }
+
+      // position image using focal point
+      const focalPoint = this.focalPoint;
+      imageTop = lerp(0, imageContainerHeight - imageHeight, focalPoint.top);
+      imageLeft = lerp(0, imageContainerWidth - imageWidth, focalPoint.left);
     }
 
     this.imageElement.style.width = `${imageWidth}px`;
