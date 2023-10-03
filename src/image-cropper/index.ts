@@ -25,3 +25,5 @@ export type UmbImageCropperPropertyEditorValue = {
   focalPoint: { left: number; top: number };
   src: string;
 };
+
+export type UmbImageCropperFocalPoint = Pick<UmbImageCropperPropertyEditorValue["focalPoint"], "left" | "top">;

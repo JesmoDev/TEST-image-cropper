@@ -9,12 +9,9 @@ import { UmbImageCropperPropertyEditorValue } from ".";
 
 @customElement("umb-image-cropper-property-editor")
 export class UmbImageCropperPropertyEditorElement extends LitElement {
-  @state()
-  focalPoint = { x: 0.5, y: 0.5 };
-
   @property({ type: Object, attribute: false })
   value?: UmbImageCropperPropertyEditorValue = {
-    focalPoint: { left: 0.5, top: 0.5 },
+    focalPoint: { left: 0.5, top: 1 },
     src: "src/assets/TEST 4.png",
     crops: [
       {
@@ -96,7 +93,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   };
 
   @state()
-  currentCrop = this.value?.crops[0];
+  currentCrop = this.value?.crops[5];
 
   async #onCropClick(crop: any) {
     const index = this.value?.crops.findIndex((c) => c.alias === crop.alias);
@@ -116,21 +113,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   #onSave = () => {
-    console.log("asd");
-
-    // if (!this.value) return;
-    // const temp = this.value;
-
-    // // TODO: Fix this
-    // // WHY DO I HAVE TO DO THIS!??!?!?
-    // this.value = undefined;
-
-    // this.requestUpdate();
-    // requestAnimationFrame(() => {
-    //   if (!this.value) return;
-    //   this.value = temp;
-    //   this.requestUpdate();
-    // });
+    //TODO Save
   };
 
   render() {
@@ -148,7 +131,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
   #renderMain() {
     return this.currentCrop
-      ? html`<umb-image-cropper @change=${this.#onCropChange} .value=${this.currentCrop}></umb-image-cropper>`
+      ? html`<umb-image-cropper @change=${this.#onCropChange} .focalPoint=${this.value?.focalPoint} .value=${this.currentCrop}></umb-image-cropper>`
       : html`<umb-image-cropper-focus-setter></umb-image-cropper-focus-setter>`;
   }
 
