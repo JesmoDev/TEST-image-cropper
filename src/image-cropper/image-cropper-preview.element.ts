@@ -4,7 +4,7 @@ import { customElement, property, query } from "lit/decorators.js";
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
 import { UmbImageCropperCrop } from ".";
-import { clamp, increaseValue } from "./mathUtils";
+import { clamp, calculateExtrapolatedValue } from "./mathUtils";
 
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
@@ -63,15 +63,15 @@ export class UmbImageCropperPreviewElement extends LitElement {
     if (this.crop.coordinates) {
       if (cropAspectRatio > 1) {
         const cropSize = this.crop.coordinates.x1 + this.crop.coordinates.x2;
-        imageWidth = increaseValue(imageContainerWidth, cropSize);
+        imageWidth = calculateExtrapolatedValue(imageContainerWidth, cropSize);
         imageHeight = imageWidth / imageAspectRatio;
         imageTop = -imageHeight * this.crop.coordinates.y1;
         imageLeft = -imageWidth * this.crop.coordinates.x1;
       } else {
         const cropSize = this.crop.coordinates.y1 + this.crop.coordinates.y2;
-        imageHeight = increaseValue(imageContainerHeight, cropSize);
+        imageHeight = calculateExtrapolatedValue(imageContainerHeight, cropSize);
         imageWidth = imageHeight * imageAspectRatio;
-        imageHeight = increaseValue(imageContainerHeight, cropSize);
+        imageHeight = calculateExtrapolatedValue(imageContainerHeight, cropSize);
         imageTop = -imageHeight * this.crop.coordinates.y1;
         imageLeft = -imageWidth * this.crop.coordinates.x1;
       }

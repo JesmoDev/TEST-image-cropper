@@ -1,7 +1,7 @@
 import { LitElement, PropertyValueMap, css, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
-import { clamp, increaseValue, inverseLerp, lerp } from "./mathUtils";
+import { clamp, calculateExtrapolatedValue, inverseLerp, lerp } from "./mathUtils";
 
 @customElement("umb-image-cropper")
 export class UmbImageCropperElement extends LitElement {
@@ -99,7 +99,7 @@ export class UmbImageCropperElement extends LitElement {
       imageLeft,
       imageTop = 0;
 
-    // NOTE {} are used to keep some variables in scope
+    // NOTE {} are used to keep some variables in scope, preventing them from being used outside.
 
     {
       // Calculate mask size
@@ -135,14 +135,14 @@ export class UmbImageCropperElement extends LitElement {
       if (cropAspectRatio > 1) {
         const cropAmount = this.value.coordinates.x1 + this.value.coordinates.x2;
         // Use the cropAmount as a factor to increase the mask size, this zooms the image.
-        imageWidth = increaseValue(maskWidth, cropAmount);
+        imageWidth = calculateExtrapolatedValue(maskWidth, cropAmount);
         imageHeight = imageWidth / imageAspectRatio;
         imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
       } else {
         const cropAmount = this.value.coordinates.y1 + this.value.coordinates.y2;
         // Use the crop zoom as a factor to increase the mask size, this zooms the image.
-        imageHeight = increaseValue(maskHeight, cropAmount);
+        imageHeight = calculateExtrapolatedValue(maskHeight, cropAmount);
         imageWidth = imageHeight * imageAspectRatio;
         imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
