@@ -234,23 +234,16 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   #onCancel() {
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: {
-          crop: undefined,
-        },
-      })
-    );
+    //TODO: How should we handle canceling the crop?
+    this.dispatchEvent(new CustomEvent("change"));
   }
 
   #onReset() {
-    this.dispatchEvent(
-      new CustomEvent("change", {
-        detail: {
-          crop: undefined,
-        },
-      })
-    );
+    if (!this.value) return;
+
+    delete this.value.coordinates;
+
+    this.dispatchEvent(new CustomEvent("change"));
   }
 
   #onSliderUpdate(event: InputEvent) {
