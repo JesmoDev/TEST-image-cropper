@@ -10,27 +10,24 @@ export class UmbImageCropperElement extends LitElement {
   @query("#image") imageElement!: HTMLImageElement;
 
   @property({ attribute: false }) value?: UmbImageCropperCrop;
+  @property({ type: String }) src: string = "";
+  @property({ attribute: false }) focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
   @property({ type: Number })
   get zoom() {
-    return this._zoom;
+    return this.#zoom;
   }
   set zoom(value) {
-    const delta = value - this._zoom;
+    // Calculate the delta value - the value the zoom has changed b
+    const delta = value - this.#zoom;
     this.#updateImageScale(delta);
   }
 
-  @property({ type: String })
-  src: string = "";
-
-  @property({ attribute: false })
-  focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
-
-  @state() private _viewportPadding = 100;
-  @state() private _maxScaleFactor = 4;
-  @state() private _zoom = 0;
-
   #DEBUG_USE_MOUSE_POSITION_FOR_ZOOM = true; //TODO: Decide and remove
 
+  #VIEWPORT_PADDING = 100 as const;
+  #MAX_SCALE_FACTOR = 4 as const;
+
+  #zoom = 0;
   #maxImageScale = 0;
   #minImageScale = 0;
   #oldImageScale = 0;
@@ -39,7 +36,7 @@ export class UmbImageCropperElement extends LitElement {
   #mouseOffsetY = 0;
 
   get imageScale() {
-    return lerp(this.#minImageScale, this.#maxImageScale, this._zoom);
+    return lerp(this.#minImageScale, this.#maxImageScale, this.#zoom);
   }
 
   connectedCallback() {
@@ -55,24 +52,13 @@ export class UmbImageCropperElement extends LitElement {
 
   async #addEventListeners() {
     await this.updateComplete;
-    this.imageElement.addEventListener("mousedown", this.#onStartDrag.bind(this));
-    window.addEventListener("mousemove", this.#onDrag.bind(this));
-    window.addEventListener("mouseup", this.#onEndDrag.bind(this));
-    this.addEventListener("wheel", this.#onWheel.bind(this));
+    this.imageElement.addEventListener("mousedown", this.#onStartDrag);
+    this.addEventListener("wheel", this.#onWheel, { passive: false }); //
   }
 
   #removeEventListeners() {
-    this.imageElement.removeEventListener("mousedown", this.#onStartDrag.bind(this));
-    window.removeEventListener("mousemove", this.#onDrag.bind(this));
-    window.removeEventListener("mouseup", this.#onEndDrag.bind(this));
-    this.removeEventListener("wheel", this.#onWheel.bind(this));
-  }
-
-  protected update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-    super.update(changedProperties);
-    if (changedProperties.has("crop")) {
-      this.#initializeCrop();
-    }
+    this.imageElement.removeEventListener("mousedown", this.#onStartDrag);
+    this.removeEventListener("wheel", this.#onWheel);
   }
 
   async #initializeCrop() {
@@ -103,7 +89,7 @@ export class UmbImageCropperElement extends LitElement {
 
     {
       // Calculate mask size
-      const viewportPadding = 2 * this._viewportPadding;
+      const viewportPadding = 2 * this.#VIEWPORT_PADDING;
       const availableWidth = viewportWidth - viewportPadding;
       const availableHeight = viewportHeight - viewportPadding;
 
@@ -128,7 +114,7 @@ export class UmbImageCropperElement extends LitElement {
       const scaleY = maskHeight / this.imageElement.naturalHeight;
       const scale = Math.max(scaleX, scaleY);
       this.#minImageScale = scale;
-      this.#maxImageScale = scale * this._maxScaleFactor;
+      this.#maxImageScale = scale * this.#MAX_SCALE_FACTOR;
     }
 
     if (this.value.coordinates) {
@@ -167,12 +153,12 @@ export class UmbImageCropperElement extends LitElement {
     this.imageElement.style.height = `${imageHeight}px`;
 
     //Calculate the zoom level based on the current scale
-    this._zoom = inverseLerp(this.#minImageScale, this.#maxImageScale, currentScale);
+    this.#zoom = inverseLerp(this.#minImageScale, this.#maxImageScale, currentScale);
   }
 
   #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {
     this.#oldImageScale = this.imageScale;
-    this._zoom = clamp(this._zoom + amount, 0, 1);
+    this.#zoom = clamp(this.#zoom + amount, 0, 1);
 
     const maskRect = this.maskElement.getBoundingClientRect();
     const imageRect = this.imageElement.getBoundingClientRect();
@@ -252,32 +238,38 @@ export class UmbImageCropperElement extends LitElement {
     this.zoom = Number(target.value);
   }
 
-  #onStartDrag(event: MouseEvent) {
+  #onStartDrag = (event: MouseEvent) => {
     event.preventDefault();
     this.#isDragging = true;
     const imageRect = this.imageElement.getBoundingClientRect();
     const viewportRect = this.viewportElement.getBoundingClientRect();
     this.#mouseOffsetX = event.clientX - imageRect.left + viewportRect.left;
     this.#mouseOffsetY = event.clientY - imageRect.top + viewportRect.top;
-  }
 
-  #onDrag(event: MouseEvent) {
+    window.addEventListener("mousemove", this.#onDrag);
+    window.addEventListener("mouseup", this.#onEndDrag);
+  };
+
+  #onDrag = (event: MouseEvent) => {
     if (this.#isDragging) {
       let newLeft = event.clientX - this.#mouseOffsetX;
       let newTop = event.clientY - this.#mouseOffsetY;
 
       this.#updateImagePosition(newTop, newLeft);
     }
-  }
+  };
 
-  #onEndDrag() {
+  #onEndDrag = () => {
     this.#isDragging = false;
-  }
 
-  #onWheel(event: WheelEvent) {
+    window.removeEventListener("mousemove", this.#onDrag);
+    window.removeEventListener("mouseup", this.#onEndDrag);
+  };
+
+  #onWheel = (event: WheelEvent) => {
     event.preventDefault();
     this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
-  }
+  };
 
   #toLocalPosition(x: number, y: number) {
     const viewportRect = this.viewportElement.getBoundingClientRect();
@@ -308,7 +300,7 @@ export class UmbImageCropperElement extends LitElement {
         <img id="image" src=${this.src} alt="" />
         <div id="mask"></div>
       </div>
-      <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
+      <input @input=${this.#onSliderUpdate} .value=${this.#zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
       <div id="actions">
         <button @click=${this.#onReset}>Reset crop</button>
         <button @click=${this.#onCancel}>Cancel</button>
