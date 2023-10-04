@@ -42,8 +42,8 @@ export class UmbImageCropperElement extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.#addEventListeners();
     this.#initializeCrop();
+    this.#addEventListeners();
   }
 
   disconnectedCallback() {
@@ -76,7 +76,6 @@ export class UmbImageCropperElement extends LitElement {
 
     const viewportAspectRatio = viewportWidth / viewportHeight;
     const cropAspectRatio = this.value.width / this.value.height;
-    const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
     // Init variables
     let maskWidth,
@@ -120,11 +119,14 @@ export class UmbImageCropperElement extends LitElement {
 
     // Calculate the image size and position
     if (this.value.coordinates) {
+      const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
+
       if (cropAspectRatio > 1) {
         const cropAmount = this.value.coordinates.x1 + this.value.coordinates.x2;
         // Use the cropAmount as a factor to increase the mask size, this zooms the image.
         imageWidth = calculateExtrapolatedValue(maskWidth, cropAmount);
         imageHeight = imageWidth / imageAspectRatio;
+        // Move the up and left from the edges of the mask based on the crop coordinates
         imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
       } else {
@@ -132,29 +134,30 @@ export class UmbImageCropperElement extends LitElement {
         // Use the crop zoom as a factor to increase the mask size, this zooms the image.
         imageHeight = calculateExtrapolatedValue(maskHeight, cropAmount);
         imageWidth = imageHeight * imageAspectRatio;
+        // Move the up and left from the edges of the mask based on the crop coordinates
         imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
       }
     } else {
+      //TODO: This is not working FIX
       // Set the image size to fill the mask while preserving aspect ratio
       imageWidth = this.imageElement.naturalWidth * this.#minImageScale;
       imageHeight = this.imageElement.naturalHeight * this.#minImageScale;
       // position image using focal point
-      const focalPoint = this.focalPoint;
-      imageTop = lerp(maskTop, maskTop + maskHeight - imageHeight, focalPoint.top);
-      imageLeft = lerp(maskLeft, maskLeft + maskWidth - imageWidth, focalPoint.left);
+      imageTop = lerp(maskTop, maskTop + maskHeight - imageHeight, this.focalPoint.top);
+      imageLeft = lerp(maskLeft, maskLeft + maskWidth - imageWidth, this.focalPoint.left);
     }
-
-    const currentScaleX = imageWidth / this.imageElement.naturalWidth;
-    const currentScaleY = imageHeight / this.imageElement.naturalHeight;
-    const currentScale = Math.max(currentScaleX, currentScaleY);
 
     this.imageElement.style.left = `${imageLeft}px`;
     this.imageElement.style.top = `${imageTop}px`;
     this.imageElement.style.width = `${imageWidth}px`;
     this.imageElement.style.height = `${imageHeight}px`;
 
-    //Calculate the zoom level based on the current scale
+    const currentScaleX = imageWidth / this.imageElement.naturalWidth;
+    const currentScaleY = imageHeight / this.imageElement.naturalHeight;
+    const currentScale = Math.max(currentScaleX, currentScaleY);
+    // Calculate the zoom level based on the current scale
+    // This finds the alpha value in the range of min and max scale.
     this._zoom = inverseLerp(this.#minImageScale, this.#maxImageScale, currentScale);
   }
 
@@ -165,19 +168,20 @@ export class UmbImageCropperElement extends LitElement {
     const maskRect = this.maskElement.getBoundingClientRect();
     const imageRect = this.imageElement.getBoundingClientRect();
 
-    let fixedLocation = { x: 0, y: 0 };
+    let fixedLocation = { left: 0, top: 0 };
 
+    // If mouse position is provided, use that as the fixed location
+    // Else use the center of the mask
     if (mouseX && mouseY && this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM) {
       fixedLocation = this.#toLocalPosition(mouseX, mouseY);
     } else {
       fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
     }
 
-    const imageLocation = this.#toLocalPosition(imageRect.left, imageRect.top);
-
-    // Calculate the new image position to keep the center of the mask fixed
-    const imageLeft = fixedLocation.x - (fixedLocation.x - imageLocation.x) * (this.imageScale / this.#oldImageScale);
-    const imageTop = fixedLocation.y - (fixedLocation.y - imageLocation.y) * (this.imageScale / this.#oldImageScale);
+    const imageLocalPosition = this.#toLocalPosition(imageRect.left, imageRect.top);
+    // Calculate the new image position while keeping the fixed location in the same position
+    const imageLeft = fixedLocation.left - (fixedLocation.left - imageLocalPosition.left) * (this.imageScale / this.#oldImageScale);
+    const imageTop = fixedLocation.top - (fixedLocation.top - imageLocalPosition.top) * (this.imageScale / this.#oldImageScale);
 
     this.imageElement.style.width = `${this.imageElement.naturalWidth * this.imageScale}px`;
     this.imageElement.style.height = `${this.imageElement.naturalHeight * this.imageScale}px`;
@@ -190,10 +194,10 @@ export class UmbImageCropperElement extends LitElement {
     const image = this.imageElement.getBoundingClientRect();
 
     // Calculate the minimum and maximum image positions
-    const minLeft = this.#toLocalPosition(mask.left + mask.width - image.width, 0).x;
-    const maxLeft = this.#toLocalPosition(mask.left, 0).x;
-    const minTop = this.#toLocalPosition(0, mask.top + mask.height - image.height).y;
-    const maxTop = this.#toLocalPosition(0, mask.top).y;
+    const minLeft = this.#toLocalPosition(mask.left + mask.width - image.width, 0).left;
+    const maxLeft = this.#toLocalPosition(mask.left, 0).left;
+    const minTop = this.#toLocalPosition(0, mask.top + mask.height - image.height).top;
+    const maxTop = this.#toLocalPosition(0, mask.top).top;
 
     // Clamp the image position to the min and max values
     left = clamp(left, minLeft, maxLeft);
@@ -201,6 +205,29 @@ export class UmbImageCropperElement extends LitElement {
 
     this.imageElement.style.left = `${left}px`;
     this.imageElement.style.top = `${top}px`;
+  }
+
+  #calculateCropCoordinates(): { x1: number; x2: number; y1: number; y2: number } {
+    const cropCoordinates = { x1: 0, y1: 0, x2: 0, y2: 0 };
+
+    const mask = this.maskElement.getBoundingClientRect();
+    const image = this.imageElement.getBoundingClientRect();
+
+    cropCoordinates.x1 = (mask.left - image.left) / image.width;
+    cropCoordinates.x2 = Math.abs((mask.right - image.right) / image.width);
+    cropCoordinates.y1 = (mask.top - image.top) / image.height;
+    cropCoordinates.y2 = Math.abs((mask.bottom - image.bottom) / image.height);
+
+    return cropCoordinates;
+  }
+
+  #toLocalPosition(left: number, top: number) {
+    const viewportRect = this.viewportElement.getBoundingClientRect();
+
+    return {
+      left: left - viewportRect.left,
+      top: top - viewportRect.top,
+    };
   }
 
   #onSave() {
@@ -265,29 +292,6 @@ export class UmbImageCropperElement extends LitElement {
     event.preventDefault();
     this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
   };
-
-  #toLocalPosition(x: number, y: number) {
-    const viewportRect = this.viewportElement.getBoundingClientRect();
-
-    return {
-      x: x - viewportRect.left,
-      y: y - viewportRect.top,
-    };
-  }
-
-  #calculateCropCoordinates(): { x1: number; x2: number; y1: number; y2: number } {
-    const cropCoordinates = { x1: 0, y1: 0, x2: 0, y2: 0 };
-
-    const mask = this.maskElement.getBoundingClientRect();
-    const image = this.imageElement.getBoundingClientRect();
-
-    cropCoordinates.x1 = (mask.left - image.left) / image.width;
-    cropCoordinates.x2 = Math.abs((mask.right - image.right) / image.width);
-    cropCoordinates.y1 = (mask.top - image.top) / image.height;
-    cropCoordinates.y2 = Math.abs((mask.bottom - image.bottom) / image.height);
-
-    return cropCoordinates;
-  }
 
   render() {
     return html`
