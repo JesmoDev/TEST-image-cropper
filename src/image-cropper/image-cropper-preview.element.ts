@@ -1,10 +1,10 @@
 import { LitElement, css, html, nothing } from "lit";
-import { customElement, property, query, state } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 
 import "./image-cropper.element";
 import "./image-cropper-focus-setter.element";
-import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
-import { clamp, distance, increaseValue, lerp } from "./mathUtils";
+import { UmbImageCropperCrop } from ".";
+import { clamp, increaseValue } from "./mathUtils";
 
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
@@ -149,7 +149,6 @@ export class UmbImageCropperPreviewElement extends LitElement {
       width: 100%;
       aspect-ratio: 1;
       overflow: hidden;
-      /* outline: 1px solid black; */
       position: relative;
       overflow: hidden;
       margin: auto;

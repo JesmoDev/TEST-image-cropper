@@ -20,7 +20,7 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   @property({ type: String })
-  src?: string = "";
+  src: string = "";
 
   @property({ attribute: false })
   focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
@@ -41,14 +41,6 @@ export class UmbImageCropperElement extends LitElement {
   get imageScale() {
     return lerp(this.#minImageScale, this.#maxImageScale, this._zoom);
   }
-
-  /* change event props
-  crop size
-  image original size
-  image position
-  new image scale
-
-  */
 
   connectedCallback() {
     super.connectedCallback();
