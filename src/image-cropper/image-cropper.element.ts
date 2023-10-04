@@ -86,8 +86,8 @@ export class UmbImageCropperElement extends LitElement {
 
     const viewportWidth = this.viewportElement.clientWidth;
     const viewportHeight = this.viewportElement.clientHeight;
-    const viewportAspectRatio = viewportWidth / viewportHeight;
 
+    const viewportAspectRatio = viewportWidth / viewportHeight;
     const cropAspectRatio = this.value.width / this.value.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
@@ -99,15 +99,10 @@ export class UmbImageCropperElement extends LitElement {
       imageLeft,
       imageTop = 0;
 
-    // if (cropAspectRatio > viewportAspectRatio) {
-    //   maskWidth = viewportWidth - this._viewportPadding * 2;
-    //   maskHeight = maskWidth / cropAspectRatio;
-    // } else {
-    //   maskHeight = viewportHeight - this._viewportPadding * 2;
-    //   maskWidth = maskHeight * cropAspectRatio;
-    // }
+    // NOTE {} are used to keep some variables in scope
 
     {
+      // Calculate mask size
       const viewportPadding = 2 * this._viewportPadding;
       const availableWidth = viewportWidth - viewportPadding;
       const availableHeight = viewportHeight - viewportPadding;
@@ -127,12 +122,14 @@ export class UmbImageCropperElement extends LitElement {
     this.maskElement.style.left = `${maskLeft}px`;
     this.maskElement.style.top = `${maskTop}px`;
 
-    // Calculate the scaling factors to fill the mask area while preserving aspect ratio
-    const scaleX = maskWidth / this.imageElement.naturalWidth;
-    const scaleY = maskHeight / this.imageElement.naturalHeight;
-    const scale = Math.max(scaleX, scaleY);
-    this.#minImageScale = scale;
-    this.#maxImageScale = scale * this._maxScaleFactor;
+    {
+      // Calculate the scaling factors to fill the mask area while preserving aspect ratio
+      const scaleX = maskWidth / this.imageElement.naturalWidth;
+      const scaleY = maskHeight / this.imageElement.naturalHeight;
+      const scale = Math.max(scaleX, scaleY);
+      this.#minImageScale = scale;
+      this.#maxImageScale = scale * this._maxScaleFactor;
+    }
 
     if (this.value.coordinates) {
       if (cropAspectRatio > 1) {
