@@ -58,7 +58,6 @@ export class UmbImageCropperElement extends LitElement {
     this.imageElement.addEventListener("mousedown", this.#onStartDrag.bind(this));
     window.addEventListener("mousemove", this.#onDrag.bind(this));
     window.addEventListener("mouseup", this.#onEndDrag.bind(this));
-    window.addEventListener("keydown", this.#onKeyDown.bind(this));
     this.addEventListener("wheel", this.#onWheel.bind(this));
   }
 
@@ -67,7 +66,6 @@ export class UmbImageCropperElement extends LitElement {
     window.removeEventListener("mousemove", this.#onDrag.bind(this));
     window.removeEventListener("mouseup", this.#onEndDrag.bind(this));
     this.removeEventListener("wheel", this.#onWheel.bind(this));
-    window.removeEventListener("keydown", this.#onKeyDown.bind(this));
   }
 
   protected update(changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
@@ -257,16 +255,6 @@ export class UmbImageCropperElement extends LitElement {
   #onWheel(event: WheelEvent) {
     event.preventDefault();
     this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
-  }
-
-  #onKeyDown(event: KeyboardEvent) {
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      this.#updateImageScale(0.1);
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      this.#updateImageScale(-0.1);
-    }
   }
 
   #toLocalPosition(x: number, y: number) {
