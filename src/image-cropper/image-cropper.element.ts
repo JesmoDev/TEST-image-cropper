@@ -91,19 +91,31 @@ export class UmbImageCropperElement extends LitElement {
     const cropAspectRatio = this.value.width / this.value.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
-    let maskWidth = 0;
-    let maskHeight = 0;
-    let imageWidth = 0;
-    let imageHeight = 0;
-    let imageLeft = 0;
-    let imageTop = 0;
+    // Init variables
+    let maskWidth,
+      maskHeight,
+      imageWidth,
+      imageHeight,
+      imageLeft,
+      imageTop = 0;
 
-    if (cropAspectRatio > viewportAspectRatio) {
-      maskWidth = viewportWidth - this._viewportPadding * 2;
-      maskHeight = maskWidth / cropAspectRatio;
-    } else {
-      maskHeight = viewportHeight - this._viewportPadding * 2;
-      maskWidth = maskHeight * cropAspectRatio;
+    // if (cropAspectRatio > viewportAspectRatio) {
+    //   maskWidth = viewportWidth - this._viewportPadding * 2;
+    //   maskHeight = maskWidth / cropAspectRatio;
+    // } else {
+    //   maskHeight = viewportHeight - this._viewportPadding * 2;
+    //   maskWidth = maskHeight * cropAspectRatio;
+    // }
+
+    {
+      const viewportPadding = 2 * this._viewportPadding;
+      const availableWidth = viewportWidth - viewportPadding;
+      const availableHeight = viewportHeight - viewportPadding;
+
+      const isCropWider = cropAspectRatio > viewportAspectRatio;
+
+      maskWidth = isCropWider ? availableWidth : availableHeight * cropAspectRatio;
+      maskHeight = isCropWider ? availableWidth / cropAspectRatio : availableHeight;
     }
 
     // Center the mask within the viewport
@@ -281,8 +293,6 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   render() {
-    if (!this.src) return nothing;
-
     return html`
       <div id="viewport">
         <img id="image" src=${this.src} alt="" />
