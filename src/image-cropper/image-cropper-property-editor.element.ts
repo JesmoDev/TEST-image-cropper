@@ -6,18 +6,26 @@ import "./image-cropper-focus-setter.element";
 import "./image-cropper-preview.element";
 import { repeat } from "lit/directives/repeat.js";
 import { UmbImageCropperPropertyEditorValue } from ".";
+import { UmbImageCropperElement } from "./image-cropper.element";
 
 @customElement("umb-image-cropper-property-editor")
 export class UmbImageCropperPropertyEditorElement extends LitElement {
-  @property({ type: Object, attribute: false })
+  @property({ attribute: false })
   get value() {
     return this.#value;
   }
   set value(value) {
-    this.crops = value?.crops ?? [];
-    this.focalPoint = value?.focalPoint ?? { left: 0.5, top: 0.5 };
-    this.src = value?.src ?? "";
-    this.#value = value;
+    if (!value) {
+      this.crops = [];
+      this.focalPoint = { left: 0.5, top: 0.5 };
+      this.src = "";
+      this.#value = undefined;
+    } else {
+      this.crops = [...value.crops];
+      this.focalPoint = value.focalPoint;
+      this.src = value.src;
+      this.#value = value;
+    }
 
     this.requestUpdate();
   }
@@ -116,11 +124,10 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   @state()
   src: UmbImageCropperPropertyEditorValue["src"] = "";
 
-  /**
-   *
-   */
   constructor() {
     super();
+
+    //TODO: Remove this
     this.value = this.#value;
   }
 
@@ -135,28 +142,37 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
   }
 
   async #onCropChange(event: CustomEvent) {
-    if (!this.currentCrop) return;
+    const target = event.target as UmbImageCropperElement;
+    const value = target.value;
 
-    this.currentCrop.coordinates = event.detail.crop;
+    if (!value) return;
 
-    if (!this.value?.crops) return;
+    const index = this.crops.findIndex((crop) => crop.alias === value.alias);
 
-    const temp = [...this.value.crops];
+    if (index === undefined) return;
 
-    this.value.crops = [];
+    this.crops[index] = value;
+    this.currentCrop = undefined;
+
+    //TODO WHY DO I HAVE TO DO THIS TO MAKE LIT UPDATE THE DOM??
+    const temp = this.crops;
+    this.crops = [];
     this.requestUpdate();
     await this.updateComplete;
-    this.value.crops = temp;
-    this.requestUpdate();
+    this.crops = temp;
   }
 
-  async #onFocalPointChange(event: CustomEvent) {
+  #onFocalPointChange(event: CustomEvent) {
     this.focalPoint = event.detail;
     this.requestUpdate();
   }
 
   #onSave = () => {
-    //TODO Save
+    this.value = {
+      focalPoint: this.focalPoint,
+      src: this.src,
+      crops: this.crops,
+    };
   };
 
   #onCancel = () => {
@@ -190,7 +206,8 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     if (!this.value || !this.crops) return;
 
     return repeat(
-      this.value.crops,
+      this.crops,
+      (crop) => crop.alias,
       (crop) => html` <umb-image-cropper-preview @click=${() => this.#onCropClick(crop)} .crop=${crop} .focalPoint=${this.focalPoint} .src=${this.src}></umb-image-cropper-preview>`
     );
   }
@@ -207,14 +224,15 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
       height: 100%;
     }
     #main {
-      flex-grow: 1;
+      width: 600px;
       height: 600px;
+      flex-shrink: 0;
     }
     #side {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 8px;
-      width: 120px;
+      flex-grow: 1;
     }
   `;
 }

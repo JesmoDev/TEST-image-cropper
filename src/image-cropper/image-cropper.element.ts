@@ -1,4 +1,4 @@
-import { LitElement, PropertyValueMap, css, html, nothing } from "lit";
+import { LitElement, PropertyValueMap, css, html } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from ".";
 import { clamp, calculateExtrapolatedValue, inverseLerp, lerp } from "./mathUtils";
@@ -222,12 +222,32 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   #onSave() {
-    const { x1, x2, y1, y2 } = this.#calculateCropCoordinates();
+    if (!this.value) return;
 
+    const { x1, x2, y1, y2 } = this.#calculateCropCoordinates();
+    this.value = {
+      ...this.value,
+      coordinates: { x1, x2, y1, y2 },
+    };
+
+    this.dispatchEvent(new CustomEvent("change"));
+  }
+
+  #onCancel() {
     this.dispatchEvent(
       new CustomEvent("change", {
         detail: {
-          crop: { x1, x2, y1, y2 },
+          crop: undefined,
+        },
+      })
+    );
+  }
+
+  #onReset() {
+    this.dispatchEvent(
+      new CustomEvent("change", {
+        detail: {
+          crop: undefined,
         },
       })
     );
@@ -296,7 +316,11 @@ export class UmbImageCropperElement extends LitElement {
         <div id="mask"></div>
       </div>
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
-      <button @click=${this.#onSave}>Save Crop</button>
+      <div id="actions">
+        <button @click=${this.#onReset}>Reset crop</button>
+        <button @click=${this.#onSave}>Cancel</button>
+        <button @click=${this.#onSave}>Save Crop</button>
+      </div>
 
       <div style="position: absolute; width: fit-content; height: 100px; bottom: 0;">
         DEBUG: Use mouse position for zoom:
