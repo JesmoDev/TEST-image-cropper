@@ -311,7 +311,7 @@ export class UmbImageCropperElement extends LitElement {
       <input @input=${this.#onSliderUpdate} .value=${this._zoom.toString()} id="slider" type="range" min="0" max="1" value="0" step="0.001" />
       <div id="actions">
         <button @click=${this.#onReset}>Reset crop</button>
-        <button @click=${this.#onSave}>Cancel</button>
+        <button @click=${this.#onCancel}>Cancel</button>
         <button @click=${this.#onSave}>Save Crop</button>
       </div>
 
