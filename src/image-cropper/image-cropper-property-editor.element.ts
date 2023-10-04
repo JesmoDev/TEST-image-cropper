@@ -169,26 +169,20 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
     this.focalPoint = event.detail;
   }
 
-  #onSave = () => {
+  #onSave() {
     this.value = {
       focalPoint: this.focalPoint,
       src: this.src,
       crops: this.crops,
     };
-  };
-
-  #onCancel = () => {
-    this.currentCrop = undefined;
-    this.requestUpdate();
-  };
+  }
 
   render() {
     return html`
       <div id="main">
         ${this.#renderMain()}
         <div id="actions">
-          <button @click=${this.#onSave} style="margin-top: 8px">Save</button>
-          <button @click=${this.#onCancel} style="margin-top: 8px">Cancel</button>
+          <button @click=${this.#onSave} style="margin-top: 8px">Save editor</button>
         </div>
       </div>
       <div id="side">${this.#renderSide()}</div>
