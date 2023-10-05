@@ -186,9 +186,12 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
         </div>
       </div>
       <div id="side">${this.#renderSide()}</div>
-      <div style="position: absolute; top: 0; left: 0">
+
+      <!-- DEBUG INFO (REMOVE LATER) -->
+      <div style="position: absolute; top: 90px; left: 0">
         <pre>${JSON.stringify(this.value, null, 2)}</pre>
       </div>
+      <!-- DEBUG INFO (REMOVE LATER) -->
     `;
   }
 
