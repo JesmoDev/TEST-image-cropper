@@ -61,6 +61,11 @@ export class AppElement extends LitElement {
           },
         },
         {
+          alias: "Gigantic crop",
+          width: 40200,
+          height: 104000,
+        },
+        {
           alias: "Desktop",
           width: 1920,
           height: 1080,
