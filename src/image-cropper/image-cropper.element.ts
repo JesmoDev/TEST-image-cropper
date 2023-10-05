@@ -140,13 +140,19 @@ export class UmbImageCropperElement extends LitElement {
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
       }
     } else {
-      //TODO: This is not working FIX
       // Set the image size to fill the mask while preserving aspect ratio
       imageWidth = this.imageElement.naturalWidth * this.#minImageScale;
       imageHeight = this.imageElement.naturalHeight * this.#minImageScale;
-      // position image using focal point
-      imageTop = lerp(maskTop, maskTop + maskHeight - imageHeight, this.focalPoint.top);
-      imageLeft = lerp(maskLeft, maskLeft + maskWidth - imageWidth, this.focalPoint.left);
+
+      // position image so that its center is at the focal point
+      imageLeft = maskLeft + maskWidth / 2 - imageWidth * this.focalPoint.left;
+      imageTop = maskTop + maskHeight / 2 - imageHeight * this.focalPoint.top;
+
+      // clamp image position so it stays within the mask
+      const minLeft = maskLeft + maskWidth - imageWidth;
+      const minTop = maskTop + maskHeight - imageHeight;
+      imageLeft = clamp(imageLeft, minLeft, maskLeft);
+      imageTop = clamp(imageTop, minTop, maskTop);
     }
 
     this.imageElement.style.left = `${imageLeft}px`;
