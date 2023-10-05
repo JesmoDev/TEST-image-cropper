@@ -28,6 +28,7 @@ export class UmbImageCropperElement extends LitElement {
 
   #VIEWPORT_PADDING = 100 as const;
   #MAX_SCALE_FACTOR = 4 as const;
+  #SCROLL_ZOOM_SPEED = 0.001 as const;
 
   #minImageScale = 0;
   #maxImageScale = 0;
@@ -124,18 +125,18 @@ export class UmbImageCropperElement extends LitElement {
 
       if (cropAspectRatio > 1) {
         const cropAmount = this.value.coordinates.x1 + this.value.coordinates.x2;
-        // Use the cropAmount as a factor to increase the mask size, this zooms the image.
+        // Use crop amount to extrapolate the image width from the mask width.
         imageWidth = calculateExtrapolatedValue(maskWidth, cropAmount);
         imageHeight = imageWidth / imageAspectRatio;
-        // Move the up and left from the edges of the mask based on the crop coordinates
+        // Move the image up and left from the top and left edges of the mask based on the crop coordinates
         imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
       } else {
         const cropAmount = this.value.coordinates.y1 + this.value.coordinates.y2;
-        // Use the crop zoom as a factor to increase the mask size, this zooms the image.
+        // Use crop amount to extrapolate the image height from the mask height.
         imageHeight = calculateExtrapolatedValue(maskHeight, cropAmount);
         imageWidth = imageHeight * imageAspectRatio;
-        // Move the up and left from the edges of the mask based on the crop coordinates
+        // Move the image up and left from the top and left edges of the mask based on the crop coordinates
         imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
         imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
       }
@@ -173,8 +174,8 @@ export class UmbImageCropperElement extends LitElement {
     this._zoom = clamp(this._zoom + amount, 0, 1);
     const newImageScale = this.#getImageScale;
 
-    const maskRect = this.maskElement.getBoundingClientRect();
-    const imageRect = this.imageElement.getBoundingClientRect();
+    const mask = this.maskElement.getBoundingClientRect();
+    const image = this.imageElement.getBoundingClientRect();
 
     let fixedLocation = { left: 0, top: 0 };
 
@@ -183,10 +184,10 @@ export class UmbImageCropperElement extends LitElement {
     if (mouseX && mouseY && this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM) {
       fixedLocation = this.#toLocalPosition(mouseX, mouseY);
     } else {
-      fixedLocation = this.#toLocalPosition(maskRect.left + maskRect.width / 2, maskRect.top + maskRect.height / 2);
+      fixedLocation = this.#toLocalPosition(mask.left + mask.width / 2, mask.top + mask.height / 2);
     }
 
-    const imageLocalPosition = this.#toLocalPosition(imageRect.left, imageRect.top);
+    const imageLocalPosition = this.#toLocalPosition(image.left, image.top);
     // Calculate the new image position while keeping the fixed location in the same position
     const imageLeft = fixedLocation.left - (fixedLocation.left - imageLocalPosition.left) * (newImageScale / this.#oldImageScale);
     const imageTop = fixedLocation.top - (fixedLocation.top - imageLocalPosition.top) * (newImageScale / this.#oldImageScale);
@@ -230,11 +231,11 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   #toLocalPosition(left: number, top: number) {
-    const viewportRect = this.viewportElement.getBoundingClientRect();
+    const viewport = this.viewportElement.getBoundingClientRect();
 
     return {
-      left: left - viewportRect.left,
-      top: top - viewportRect.top,
+      left: left - viewport.left,
+      top: top - viewport.top,
     };
   }
 
@@ -271,10 +272,10 @@ export class UmbImageCropperElement extends LitElement {
     event.preventDefault();
 
     this.#isDragging = true;
-    const imageRect = this.imageElement.getBoundingClientRect();
-    const viewportRect = this.viewportElement.getBoundingClientRect();
-    this.#mouseOffsetX = event.clientX - imageRect.left + viewportRect.left;
-    this.#mouseOffsetY = event.clientY - imageRect.top + viewportRect.top;
+    const image = this.imageElement.getBoundingClientRect();
+    const viewport = this.viewportElement.getBoundingClientRect();
+    this.#mouseOffsetX = event.clientX - image.left + viewport.left;
+    this.#mouseOffsetY = event.clientY - image.top + viewport.top;
 
     window.addEventListener("mousemove", this.#onDrag);
     window.addEventListener("mouseup", this.#onEndDrag);
@@ -298,7 +299,7 @@ export class UmbImageCropperElement extends LitElement {
 
   #onWheel = (event: WheelEvent) => {
     event.preventDefault();
-    this.#updateImageScale(event.deltaY * -0.001, event.clientX, event.clientY);
+    this.#updateImageScale(event.deltaY * -this.#SCROLL_ZOOM_SPEED, event.clientX, event.clientY);
   };
 
   render() {
@@ -355,7 +356,10 @@ export class UmbImageCropperElement extends LitElement {
       box-shadow: 0 0 0 2000px hsla(0, 0%, 100%, 0.8);
       pointer-events: none;
     }
-    /* #mask::after {
+
+    /* Debug crosshair */
+    /* 
+    #mask::after {
       content: "";
       position: absolute;
       top: 50%;

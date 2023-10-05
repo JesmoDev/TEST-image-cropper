@@ -64,16 +64,19 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
     if (this.crop.coordinates) {
       if (cropAspectRatio > 1) {
-        const cropSize = this.crop.coordinates.x1 + this.crop.coordinates.x2;
-        imageWidth = calculateExtrapolatedValue(imageContainerWidth, cropSize);
+        const cropAmount = this.crop.coordinates.x1 + this.crop.coordinates.x2;
+        // Use crop amount to extrapolate the image width from the container width.
+        imageWidth = calculateExtrapolatedValue(imageContainerWidth, cropAmount);
         imageHeight = imageWidth / imageAspectRatio;
+        // Move the image up and left from the top and left edges of the container based on the crop coordinates
         imageTop = -imageHeight * this.crop.coordinates.y1;
         imageLeft = -imageWidth * this.crop.coordinates.x1;
       } else {
-        const cropSize = this.crop.coordinates.y1 + this.crop.coordinates.y2;
-        imageHeight = calculateExtrapolatedValue(imageContainerHeight, cropSize);
+        const cropAmount = this.crop.coordinates.y1 + this.crop.coordinates.y2;
+        // Use crop amount to extrapolate the image height from the container height.
+        imageHeight = calculateExtrapolatedValue(imageContainerHeight, cropAmount);
         imageWidth = imageHeight * imageAspectRatio;
-        imageHeight = calculateExtrapolatedValue(imageContainerHeight, cropSize);
+        // Move the image up and left from the top and left edges of the container based on the crop coordinates
         imageTop = -imageHeight * this.crop.coordinates.y1;
         imageLeft = -imageWidth * this.crop.coordinates.x1;
       }
