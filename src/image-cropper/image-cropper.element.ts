@@ -11,7 +11,10 @@ export class UmbImageCropperElement extends LitElement {
 
 	@property({ attribute: false }) value?: UmbImageCropperCrop;
 	@property({ type: String }) src: string = '';
-	@property({ attribute: false }) focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
+	@property({ attribute: false }) focalPoint: UmbImageCropperFocalPoint = {
+		left: 0.5,
+		top: 0.5,
+	};
 	@property({ type: Number })
 	get zoom() {
 		return this._zoom;

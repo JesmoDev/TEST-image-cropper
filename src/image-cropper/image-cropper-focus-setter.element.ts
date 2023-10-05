@@ -1,6 +1,7 @@
 import { LitElement, PropertyValueMap, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { clamp } from './mathUtils';
+import { UmbImageCropperFocalPoint } from '.';
 
 @customElement('umb-image-cropper-focus-setter')
 export class UmbImageCropperFocusSetterElement extends LitElement {
@@ -8,7 +9,7 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
 	@query('#focal-point') focalPointElement!: HTMLImageElement;
 
 	@property({ type: String }) src?: string;
-	@property({ attribute: false }) focalPoint = { left: 0.5, top: 0.5 };
+	@property({ attribute: false }) focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
 
 	#DOT_RADIUS = 6 as const;
 

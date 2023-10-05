@@ -1,15 +1,3 @@
-export type UmbImageCropperCrop = {
-	alias: string;
-	coordinates?: {
-		x1: number;
-		x2: number;
-		y1: number;
-		y2: number;
-	};
-	height: number;
-	width: number;
-};
-
 export type UmbImageCropperPropertyEditorValue = {
 	crops: Array<{
 		alias: string;
@@ -26,4 +14,6 @@ export type UmbImageCropperPropertyEditorValue = {
 	src: string;
 };
 
-export type UmbImageCropperFocalPoint = Pick<UmbImageCropperPropertyEditorValue['focalPoint'], 'left' | 'top'>;
+export type UmbImageCropperCrop = UmbImageCropperPropertyEditorValue['crops'][number];
+export type UmbImageCropperCrops = UmbImageCropperPropertyEditorValue['crops'];
+export type UmbImageCropperFocalPoint = UmbImageCropperPropertyEditorValue['focalPoint'];

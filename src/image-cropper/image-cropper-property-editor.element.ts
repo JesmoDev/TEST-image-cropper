@@ -5,7 +5,12 @@ import './image-cropper.element';
 import './image-cropper-focus-setter.element';
 import './image-cropper-preview.element';
 import { repeat } from 'lit/directives/repeat.js';
-import { UmbImageCropperPropertyEditorValue } from '.';
+import {
+	UmbImageCropperCrop,
+	UmbImageCropperCrops,
+	UmbImageCropperFocalPoint,
+	UmbImageCropperPropertyEditorValue,
+} from '.';
 import { UmbImageCropperElement } from './image-cropper.element';
 
 @customElement('umb-image-cropper-property-editor')
@@ -30,7 +35,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 		this.requestUpdate();
 	}
 
-	#value? = {
+	#value?: UmbImageCropperPropertyEditorValue = {
 		focalPoint: { left: 0.5, top: 0.5 },
 		src: 'src/assets/TEST 4.png',
 		crops: [
@@ -113,16 +118,16 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 	};
 
 	@state()
-	currentCrop?: UmbImageCropperPropertyEditorValue['crops'][number];
+	currentCrop?: UmbImageCropperCrop;
 
 	@state()
-	crops: UmbImageCropperPropertyEditorValue['crops'] = [];
+	crops: UmbImageCropperCrops = [];
 
 	@state()
-	focalPoint: UmbImageCropperPropertyEditorValue['focalPoint'] = { left: 0.5, top: 0.5 };
+	focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
 
 	@state()
-	src: UmbImageCropperPropertyEditorValue['src'] = '';
+	src = '';
 
 	constructor() {
 		super();

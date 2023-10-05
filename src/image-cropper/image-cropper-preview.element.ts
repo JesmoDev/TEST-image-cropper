@@ -3,7 +3,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import './image-cropper.element';
 import './image-cropper-focus-setter.element';
-import { UmbImageCropperCrop } from '.';
+import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from '.';
 import { clamp, calculateExtrapolatedValue } from './mathUtils';
 
 @customElement('umb-image-cropper-preview')
@@ -26,7 +26,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
 		this.#onFocalPointUpdated();
 	}
 
-	#focalPoint = { left: 0.5, top: 0.5 };
+	#focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
 
 	connectedCallback() {
 		super.connectedCallback();
