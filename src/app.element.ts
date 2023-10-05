@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 
 import "./image-cropper/image-cropper-property-editor.element";
@@ -116,13 +116,18 @@ export class AppElement extends LitElement {
   ];
 
   @state()
-  _value = this._testCrops[0];
+  _value? = [...this._testCrops][0];
 
-  #onChangeImage(index: number) {
-    this._value = this._testCrops[index];
+  async #onChangeImage(index: number) {
+    this._value = undefined;
+    this.requestUpdate();
+    await this.updateComplete;
+    this._value = [...this._testCrops][index];
+    this.requestUpdate();
   }
 
   render() {
+    if (!this._value) return nothing;
     return html`
       <div id="left-panel">
         <div id="buttons">
@@ -138,16 +143,19 @@ export class AppElement extends LitElement {
     :host {
       display: flex;
       color: #1f1f1f;
+      padding: 32px;
+      box-sizing: border-box;
     }
 
     #left-panel {
       width: 300px;
-      height: 100vh;
+      height: 100%;
       flex-shrink: 0;
       margin-right: 16px;
-      border-right: 1px solid #1f1f1f;
       padding: 16px;
       box-sizing: border-box;
+      margin-top: -16px;
+      margin-left: -16px;
     }
 
     #buttons {
