@@ -1,5 +1,5 @@
 import { LitElement, css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 
 import './image-cropper/image-cropper-property-editor.element';
 
