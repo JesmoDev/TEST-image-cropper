@@ -29,7 +29,7 @@
  * // result3 is 20, as it's clamped to the maximum value (maxValue).
  */
 export function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
+	return Math.min(Math.max(value, min), max);
 }
 
 /**
@@ -57,11 +57,11 @@ export function clamp(value: number, min: number, max: number): number {
  * // result2 is 15, equivalent to lerp(value3, value4, 1)
  */
 export function lerp(start: number, end: number, alpha: number): number {
-  // Ensure that alpha is clamped between 0 and 1
-  alpha = clamp(alpha, 0, 1);
+	// Ensure that alpha is clamped between 0 and 1
+	alpha = clamp(alpha, 0, 1);
 
-  // Perform linear interpolation
-  return start * (1 - alpha) + end * alpha;
+	// Perform linear interpolation
+	return start * (1 - alpha) + end * alpha;
 }
 
 /**
@@ -94,11 +94,11 @@ export function lerp(start: number, end: number, alpha: number): number {
  * // result2 is 0, as start and end are equal.
  */
 export function inverseLerp(start: number, end: number, value: number): number {
-  if (start === end) {
-    return 0; // Avoid division by zero if start and end are equal
-  }
+	if (start === end) {
+		return 0; // Avoid division by zero if start and end are equal
+	}
 
-  return (value - start) / (end - start);
+	return (value - start) / (end - start);
 }
 
 /**
@@ -123,7 +123,7 @@ export function inverseLerp(start: number, end: number, value: number): number {
  * // result2 is 30
  */
 export function distance(a: number, b: number): number {
-  return Math.abs(a - b);
+	return Math.abs(a - b);
 }
 
 /**
@@ -150,10 +150,10 @@ export function distance(a: number, b: number): number {
  * // result3 is NaN
  */
 export function calculateExtrapolatedValue(initialValue: number, increaseFactor: number): number {
-  if (increaseFactor < 0 || increaseFactor >= 1) {
-    // Return a special value to indicate an invalid input.
-    return NaN;
-  }
+	if (increaseFactor < 0 || increaseFactor >= 1) {
+		// Return a special value to indicate an invalid input.
+		return NaN;
+	}
 
-  return initialValue / (1 - increaseFactor);
+	return initialValue / (1 - increaseFactor);
 }
