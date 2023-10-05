@@ -65,9 +65,10 @@ export class UmbImageCropperElement extends LitElement {
   async #initializeCrop() {
     if (!this.value) return;
 
-    await this.updateComplete;
+    await this.updateComplete; // Wait for the @query to be resolved
 
     if (!this.imageElement.complete) {
+      // Wait for the image to load
       await new Promise((resolve) => (this.imageElement.onload = () => resolve(this.imageElement)));
     }
 

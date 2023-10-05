@@ -9,7 +9,7 @@ import { clamp, calculateExtrapolatedValue } from "./mathUtils";
 @customElement("umb-image-cropper-preview")
 export class UmbImageCropperPreviewElement extends LitElement {
   @query("#image") imageElement!: HTMLImageElement;
-  @query("#image-container") imageContainerElement!: HTMLImageElement;
+  @query("#container") imageContainerElement!: HTMLImageElement;
 
   @property({ type: Object, attribute: false })
   crop?: UmbImageCropperCrop;
@@ -30,25 +30,27 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.#init();
+    this.#initializeCrop();
   }
 
-  async #init() {
+  async #initializeCrop() {
     if (!this.crop) return;
 
-    await this.updateComplete;
+    await this.updateComplete; // Wait for the @query to be resolved
 
     if (!this.imageElement.complete) {
+      // Wait for the image to load
       await new Promise((resolve) => (this.imageElement.onload = () => resolve(this.imageElement)));
     }
 
-    const imageContainerRect = this.imageContainerElement.getBoundingClientRect();
-    let imageContainerWidth = imageContainerRect.width;
-    let imageContainerHeight = imageContainerRect.height;
-    let imageWidth = 0;
-    let imageHeight = 0;
-    let imageLeft = 0;
-    let imageTop = 0;
+    const container = this.imageContainerElement.getBoundingClientRect();
+    let imageContainerWidth = container.width;
+    let imageContainerHeight = container.height;
+    let imageWidth,
+      imageHeight,
+      imageLeft,
+      imageTop = 0;
+
     const cropAspectRatio = this.crop.width / this.crop.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
@@ -129,10 +131,10 @@ export class UmbImageCropperPreviewElement extends LitElement {
     }
 
     return html`
-      <div id="image-container">
+      <div id="container">
         <img id="image" src=${this.src} alt="image" />
       </div>
-      <span id="name">${this.crop.alias}</span>
+      <span id="alias">${this.crop.alias}</span>
       <span id="dimensions">${this.crop.width} x ${this.crop.height}</span>
     `;
   }
@@ -144,7 +146,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
       padding: 12px;
       border-radius: 4px;
     }
-    #image-container {
+    #container {
       display: flex;
       width: 100%;
       aspect-ratio: 1;
@@ -153,7 +155,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
       overflow: hidden;
       margin: auto;
     }
-    #name {
+    #alias {
       font-weight: bold;
       margin-top: 8px;
     }
