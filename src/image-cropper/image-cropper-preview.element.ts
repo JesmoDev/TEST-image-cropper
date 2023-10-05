@@ -64,6 +64,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
 
 		if (this.crop.coordinates) {
 			if (cropAspectRatio > 1) {
+				// Landscape-oriented cropping
 				const cropAmount = this.crop.coordinates.x1 + this.crop.coordinates.x2;
 				// Use crop amount to extrapolate the image width from the container width.
 				imageWidth = calculateExtrapolatedValue(imageContainerWidth, cropAmount);
@@ -72,6 +73,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
 				imageTop = -imageHeight * this.crop.coordinates.y1;
 				imageLeft = -imageWidth * this.crop.coordinates.x1;
 			} else {
+				// Portrait-oriented cropping
 				const cropAmount = this.crop.coordinates.y1 + this.crop.coordinates.y2;
 				// Use crop amount to extrapolate the image height from the container height.
 				imageHeight = calculateExtrapolatedValue(imageContainerHeight, cropAmount);

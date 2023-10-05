@@ -124,6 +124,7 @@ export class UmbImageCropperElement extends LitElement {
 			const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
 			if (cropAspectRatio > 1) {
+				// Landscape-oriented cropping
 				const cropAmount = this.value.coordinates.x1 + this.value.coordinates.x2;
 				// Use crop amount to extrapolate the image width from the mask width.
 				imageWidth = calculateExtrapolatedValue(maskWidth, cropAmount);
@@ -132,6 +133,7 @@ export class UmbImageCropperElement extends LitElement {
 				imageLeft = -imageWidth * this.value.coordinates.x1 + maskLeft;
 				imageTop = -imageHeight * this.value.coordinates.y1 + maskTop;
 			} else {
+				// Portrait-oriented cropping
 				const cropAmount = this.value.coordinates.y1 + this.value.coordinates.y2;
 				// Use crop amount to extrapolate the image height from the mask height.
 				imageHeight = calculateExtrapolatedValue(maskHeight, cropAmount);
