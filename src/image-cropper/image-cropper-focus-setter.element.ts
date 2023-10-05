@@ -10,6 +10,8 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
   @property({ type: String }) src?: string;
   @property({ attribute: false }) focalPoint = { left: 0.5, top: 0.5 };
 
+  #DOT_RADIUS = 6 as const;
+
   connectedCallback() {
     super.connectedCallback();
     this.#addEventListeners();
@@ -22,12 +24,13 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
 
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     super.firstUpdated(_changedProperties);
-    this.focalPointElement.style.left = `calc(${this.focalPoint.left * 100}% - 6px)`;
-    this.focalPointElement.style.top = `calc(${this.focalPoint.top * 100}% - 6px)`;
+    this.style.setProperty("--dot-radius", `${this.#DOT_RADIUS}px`);
+    this.focalPointElement.style.left = `calc(${this.focalPoint.left * 100}% - ${this.#DOT_RADIUS}px)`;
+    this.focalPointElement.style.top = `calc(${this.focalPoint.top * 100}% - ${this.#DOT_RADIUS}px)`;
   }
 
   async #addEventListeners() {
-    await this.updateComplete;
+    await this.updateComplete; // Wait for the @query to be resolved
     this.imageElement.addEventListener("mousedown", this.#onStartDrag);
     window.addEventListener("mouseup", this.#onEndDrag);
   }
@@ -64,8 +67,8 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
     const left = clamp(x / image.width, 0, 1);
     const top = clamp(y / image.height, 0, 1);
 
-    this.focalPointElement.style.left = `${x + image.left - viewport.left - 6}px`;
-    this.focalPointElement.style.top = `${y + image.top - viewport.top - 6}px`;
+    this.focalPointElement.style.left = `${x + image.left - viewport.left - this.#DOT_RADIUS}px`;
+    this.focalPointElement.style.top = `${y + image.top - viewport.top - this.#DOT_RADIUS}px`;
 
     this.dispatchEvent(
       new CustomEvent("change", {
@@ -103,8 +106,8 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
       content: "";
       display: block;
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: calc(2 * var(--dot-radius));
+      height: calc(2 * var(--dot-radius));
       outline: 3px solid black;
       top: 0;
       border-radius: 50%;
