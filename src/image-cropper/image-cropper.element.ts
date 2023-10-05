@@ -29,14 +29,14 @@ export class UmbImageCropperElement extends LitElement {
   #VIEWPORT_PADDING = 100 as const;
   #MAX_SCALE_FACTOR = 4 as const;
 
-  #maxImageScale = 0;
   #minImageScale = 0;
+  #maxImageScale = 0;
   #oldImageScale = 0;
   #isDragging = false;
   #mouseOffsetX = 0;
   #mouseOffsetY = 0;
 
-  get imageScale() {
+  get #getImageScale() {
     return lerp(this.#minImageScale, this.#maxImageScale, this._zoom);
   }
 
@@ -163,8 +163,9 @@ export class UmbImageCropperElement extends LitElement {
   }
 
   #updateImageScale(amount: number, mouseX?: number, mouseY?: number) {
-    this.#oldImageScale = this.imageScale;
+    this.#oldImageScale = this.#getImageScale;
     this._zoom = clamp(this._zoom + amount, 0, 1);
+    const newImageScale = this.#getImageScale;
 
     const maskRect = this.maskElement.getBoundingClientRect();
     const imageRect = this.imageElement.getBoundingClientRect();
@@ -181,11 +182,11 @@ export class UmbImageCropperElement extends LitElement {
 
     const imageLocalPosition = this.#toLocalPosition(imageRect.left, imageRect.top);
     // Calculate the new image position while keeping the fixed location in the same position
-    const imageLeft = fixedLocation.left - (fixedLocation.left - imageLocalPosition.left) * (this.imageScale / this.#oldImageScale);
-    const imageTop = fixedLocation.top - (fixedLocation.top - imageLocalPosition.top) * (this.imageScale / this.#oldImageScale);
+    const imageLeft = fixedLocation.left - (fixedLocation.left - imageLocalPosition.left) * (newImageScale / this.#oldImageScale);
+    const imageTop = fixedLocation.top - (fixedLocation.top - imageLocalPosition.top) * (newImageScale / this.#oldImageScale);
 
-    this.imageElement.style.width = `${this.imageElement.naturalWidth * this.imageScale}px`;
-    this.imageElement.style.height = `${this.imageElement.naturalHeight * this.imageScale}px`;
+    this.imageElement.style.width = `${this.imageElement.naturalWidth * newImageScale}px`;
+    this.imageElement.style.height = `${this.imageElement.naturalHeight * newImageScale}px`;
 
     this.#updateImagePosition(imageTop, imageLeft);
   }
@@ -215,8 +216,8 @@ export class UmbImageCropperElement extends LitElement {
     const image = this.imageElement.getBoundingClientRect();
 
     cropCoordinates.x1 = (mask.left - image.left) / image.width;
-    cropCoordinates.x2 = Math.abs((mask.right - image.right) / image.width);
     cropCoordinates.y1 = (mask.top - image.top) / image.height;
+    cropCoordinates.x2 = Math.abs((mask.right - image.right) / image.width);
     cropCoordinates.y2 = Math.abs((mask.bottom - image.bottom) / image.height);
 
     return cropCoordinates;
