@@ -1,8 +1,5 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-
-import './image-cropper.element';
-import './image-cropper-focus-setter.element';
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from '.';
 import { clamp, calculateExtrapolatedValue } from './mathUtils';
 
