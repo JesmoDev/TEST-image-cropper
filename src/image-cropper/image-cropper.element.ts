@@ -79,11 +79,11 @@ export class UmbImageCropperElement extends LitElement {
     const cropAspectRatio = this.value.width / this.value.height;
 
     // Init variables
-    let maskWidth,
-      maskHeight,
-      imageWidth,
-      imageHeight,
-      imageLeft,
+    let maskWidth = 0,
+      maskHeight = 0,
+      imageWidth = 0,
+      imageHeight = 0,
+      imageLeft = 0,
       imageTop = 0;
 
     // NOTE {} are used to keep some variables in scope, preventing them from being used outside.

@@ -44,22 +44,22 @@ export class UmbImageCropperPreviewElement extends LitElement {
     }
 
     const container = this.imageContainerElement.getBoundingClientRect();
-    let imageContainerWidth = container.width;
-    let imageContainerHeight = container.height;
-    let imageWidth,
-      imageHeight,
-      imageLeft,
-      imageTop = 0;
-
     const cropAspectRatio = this.crop.width / this.crop.height;
     const imageAspectRatio = this.imageElement.naturalWidth / this.imageElement.naturalHeight;
 
+    let imageContainerWidth = 0,
+      imageContainerHeight = 0,
+      imageWidth = 0,
+      imageHeight = 0,
+      imageLeft = 0,
+      imageTop = 0;
+
     if (cropAspectRatio > 1) {
-      imageContainerWidth = imageContainerWidth;
-      imageContainerHeight = imageContainerWidth / cropAspectRatio;
+      imageContainerWidth = container.width;
+      imageContainerHeight = container.width / cropAspectRatio;
     } else {
-      imageContainerWidth = imageContainerHeight * cropAspectRatio;
-      imageContainerHeight = imageContainerHeight;
+      imageContainerWidth = container.height * cropAspectRatio;
+      imageContainerHeight = container.height;
     }
 
     if (this.crop.coordinates) {
