@@ -167,6 +167,10 @@ export class AppElement extends LitElement {
 
     button {
       padding: 16px;
+      color: white;
+      background-color: #334eaf;
+      border: none;
+      border-radius: 4px;
     }
   `;
 }

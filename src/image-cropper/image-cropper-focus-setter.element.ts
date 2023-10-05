@@ -92,9 +92,10 @@ export class UmbImageCropperFocusSetterElement extends LitElement {
       display: flex;
       width: 100%;
       height: 100%;
-      border: 1px solid black;
       position: relative;
       user-select: none;
+      background-color: white;
+      outline: 1px solid lightgrey;
     }
     #image {
       max-width: 100%;

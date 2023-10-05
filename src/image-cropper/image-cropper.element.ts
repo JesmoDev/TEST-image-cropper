@@ -339,7 +339,8 @@ export class UmbImageCropperElement extends LitElement {
       position: relative;
       width: 100%;
       height: 100%;
-      outline: 1px solid black;
+      outline: 1px solid lightgrey;
+      border-radius: 4px;
     }
 
     #mask {
@@ -348,7 +349,7 @@ export class UmbImageCropperElement extends LitElement {
       box-shadow: 0 0 0 2000px hsla(0, 0%, 100%, 0.8);
       pointer-events: none;
     }
-    #mask::after {
+    /* #mask::after {
       content: "";
       position: absolute;
       top: 50%;
@@ -358,7 +359,7 @@ export class UmbImageCropperElement extends LitElement {
       height: 10px;
       outline: 1px solid red;
       border-radius: 50%;
-    }
+    } */
 
     #image {
       display: block;

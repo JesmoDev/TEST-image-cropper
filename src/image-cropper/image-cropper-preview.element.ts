@@ -143,9 +143,10 @@ export class UmbImageCropperPreviewElement extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      outline: 1px solid black;
+      outline: 1px solid lightgrey;
       padding: 12px;
       border-radius: 4px;
+      background-color: white;
     }
     #container {
       display: flex;
