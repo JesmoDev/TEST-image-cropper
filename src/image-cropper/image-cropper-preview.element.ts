@@ -79,8 +79,13 @@ export class UmbImageCropperPreviewElement extends LitElement {
 				imageTop = -imageHeight * this.crop.coordinates.y1;
 				imageLeft = -imageWidth * this.crop.coordinates.x1;
 			}
-			this.imageElement.style.top = `${imageTop}px`;
-			this.imageElement.style.left = `${imageLeft}px`;
+
+			//convert to percentages
+			imageTop = (imageTop / imageContainerHeight) * 100;
+			imageLeft = (imageLeft / imageContainerWidth) * 100;
+
+			this.imageElement.style.top = `${imageTop}%`;
+			this.imageElement.style.left = `${imageLeft}%`;
 		} else {
 			// Set the image size to fill the imageContainer while preserving aspect ratio
 			if (cropAspectRatio > 1) {
@@ -98,8 +103,12 @@ export class UmbImageCropperPreviewElement extends LitElement {
 		// this.imageContainerElement.style.height = `${imageContainerHeight}px`;
 		this.imageContainerElement.style.aspectRatio = `${cropAspectRatio}`;
 
-		this.imageElement.style.width = `${imageWidth}px`;
-		this.imageElement.style.height = `${imageHeight}px`;
+		// convert to percentages
+		imageWidth = (imageWidth / imageContainerWidth) * 100;
+		imageHeight = (imageHeight / imageContainerHeight) * 100;
+
+		this.imageElement.style.width = `${imageWidth}%`;
+		this.imageElement.style.height = `${imageHeight}%`;
 	}
 
 	#onFocalPointUpdated(imageWidth?: number, imageHeight?: number, containerWidth?: number, containerHeight?: number) {
@@ -124,8 +133,12 @@ export class UmbImageCropperPreviewElement extends LitElement {
 		imageLeft = clamp(imageLeft, containerWidth - imageWidth, 0);
 		imageTop = clamp(imageTop, containerHeight - imageHeight, 0);
 
-		this.imageElement.style.top = `${imageTop}px`;
-		this.imageElement.style.left = `${imageLeft}px`;
+		// convert to percentages
+		imageLeft = (imageLeft / containerWidth) * 100;
+		imageTop = (imageTop / containerHeight) * 100;
+
+		this.imageElement.style.top = `${imageTop}%`;
+		this.imageElement.style.left = `${imageLeft}%`;
 	}
 
 	render() {
@@ -160,6 +173,7 @@ export class UmbImageCropperPreviewElement extends LitElement {
 			overflow: hidden;
 			margin: auto;
 			max-width: 100%;
+			max-height: 200px;
 			user-select: none;
 		}
 		#alias {
