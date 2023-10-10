@@ -27,8 +27,6 @@ export class UmbImageCropperElement extends LitElement {
 
 	@state() _zoom = 0;
 
-	#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM = true; //TODO: Decide and remove, also remove the checkbox
-
 	#VIEWPORT_PADDING = 100 as const;
 	#MAX_SCALE_FACTOR = 4 as const;
 	#SCROLL_ZOOM_SPEED = 0.001 as const;
@@ -194,7 +192,7 @@ export class UmbImageCropperElement extends LitElement {
 
 		// If mouse position is provided, use that as the fixed location
 		// Else use the center of the mask
-		if (mouseX && mouseY && this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM) {
+		if (mouseX && mouseY) {
 			fixedLocation = this.#toLocalPosition(mouseX, mouseY);
 		} else {
 			fixedLocation = this.#toLocalPosition(mask.left + mask.width / 2, mask.top + mask.height / 2);
@@ -337,16 +335,6 @@ export class UmbImageCropperElement extends LitElement {
 				<button @click=${this.#onCancel}>Cancel</button>
 				<button @click=${this.#onSave}>Save Crop</button>
 			</div>
-
-			<div style="position: absolute; width: fit-content; height: 100px; bottom: 0;">
-				DEBUG: Use mouse position for zoom:
-				<input
-					type="checkbox"
-					?checked=${this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM}
-					@change=${(e: InputEvent) => {
-						this.#DEBUG_USE_MOUSE_POSITION_FOR_ZOOM = (e.target as HTMLInputElement).checked;
-					}} />
-			</div>
 		`;
 	}
 
@@ -378,20 +366,6 @@ export class UmbImageCropperElement extends LitElement {
 			box-shadow: 0 0 0 2000px hsla(0, 0%, 100%, 0.8);
 			pointer-events: none;
 		}
-
-		/* Debug crosshair */
-		/* 
-    #mask::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      width: 10px;
-      height: 10px;
-      outline: 1px solid red;
-      border-radius: 50%;
-    } */
 
 		#image {
 			display: block;

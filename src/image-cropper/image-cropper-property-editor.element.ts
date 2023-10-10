@@ -47,18 +47,14 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 	focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
 
 	@state()
-	showCropper = false;
-
-	@state()
 	src = '';
 
-	async #onCropClick(crop: any) {
+	#onCropClick(crop: any) {
 		const index = this.crops.findIndex((c) => c.alias === crop.alias);
 
 		if (index === -1) return;
 
 		this.currentCrop = { ...this.crops[index] };
-		this.showCropper = true;
 	}
 
 	#onCropChange(event: CustomEvent) {
@@ -73,7 +69,6 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
 		this.crops[index] = value;
 		this.currentCrop = undefined;
-		this.showCropper = false;
 	}
 
 	#onFocalPointChange(event: CustomEvent) {
@@ -97,17 +92,11 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 				</div>
 			</div>
 			<div id="side">${this.#renderSide()}</div>
-
-			<!-- DEBUG INFO (REMOVE LATER) -->
-			<div style="position: absolute; top: 90px; left: 0">
-				<pre>${JSON.stringify(this.value, null, 2)}</pre>
-			</div>
-			<!-- DEBUG INFO (REMOVE LATER) -->
 		`;
 	}
 
 	#renderMain() {
-		return this.showCropper
+		return this.currentCrop
 			? html`<umb-image-cropper
 					@change=${this.#onCropChange}
 					.src=${this.src}
