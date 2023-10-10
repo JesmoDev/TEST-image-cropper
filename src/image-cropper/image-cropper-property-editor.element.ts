@@ -47,19 +47,18 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 	focalPoint: UmbImageCropperFocalPoint = { left: 0.5, top: 0.5 };
 
 	@state()
+	showCropper = false;
+
+	@state()
 	src = '';
 
 	async #onCropClick(crop: any) {
 		const index = this.crops.findIndex((c) => c.alias === crop.alias);
 
-		if (index === undefined) return;
+		if (index === -1) return;
 
-		//TODO WHY DO I HAVE TO DO THIS TO MAKE LIT UPDATE THE DOM??
-		this.currentCrop = undefined;
-		this.requestUpdate();
-		await this.updateComplete;
-		this.currentCrop = this.crops[index!];
-		this.requestUpdate();
+		this.currentCrop = { ...this.crops[index] };
+		this.showCropper = true;
 	}
 
 	#onCropChange(event: CustomEvent) {
@@ -74,8 +73,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
 		this.crops[index] = value;
 		this.currentCrop = undefined;
-
-		this.requestUpdate();
+		this.showCropper = false;
 	}
 
 	#onFocalPointChange(event: CustomEvent) {
@@ -109,7 +107,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 	}
 
 	#renderMain() {
-		return this.currentCrop
+		return this.showCropper
 			? html`<umb-image-cropper
 					@change=${this.#onCropChange}
 					.src=${this.src}

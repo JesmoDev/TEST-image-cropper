@@ -1,4 +1,4 @@
-import { LitElement, css, html } from 'lit';
+import { LitElement, PropertyValueMap, css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { UmbImageCropperCrop, UmbImageCropperFocalPoint } from '.';
 import { clamp, calculateExtrapolatedValue, inverseLerp, lerp } from './mathUtils';
@@ -9,7 +9,7 @@ export class UmbImageCropperElement extends LitElement {
 	@query('#mask') maskElement!: HTMLElement;
 	@query('#image') imageElement!: HTMLImageElement;
 
-	@property({ attribute: false }) value?: UmbImageCropperCrop;
+	@property({ type: Object, attribute: false }) value?: UmbImageCropperCrop;
 	@property({ type: String }) src: string = '';
 	@property({ attribute: false }) focalPoint: UmbImageCropperFocalPoint = {
 		left: 0.5,
@@ -64,6 +64,14 @@ export class UmbImageCropperElement extends LitElement {
 	#removeEventListeners() {
 		this.imageElement.removeEventListener('mousedown', this.#onStartDrag);
 		this.removeEventListener('wheel', this.#onWheel);
+	}
+
+	protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+		super.updated(_changedProperties);
+
+		if (_changedProperties.has('value')) {
+			this.#initializeCrop();
+		}
 	}
 
 	async #initializeCrop() {
