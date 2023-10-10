@@ -95,7 +95,8 @@ export class UmbImageCropperPreviewElement extends LitElement {
 		}
 
 		this.imageContainerElement.style.width = `${imageContainerWidth}px`;
-		this.imageContainerElement.style.height = `${imageContainerHeight}px`;
+		// this.imageContainerElement.style.height = `${imageContainerHeight}px`;
+		this.imageContainerElement.style.aspectRatio = `${cropAspectRatio}`;
 
 		this.imageElement.style.width = `${imageWidth}px`;
 		this.imageElement.style.height = `${imageHeight}px`;
@@ -158,6 +159,8 @@ export class UmbImageCropperPreviewElement extends LitElement {
 			position: relative;
 			overflow: hidden;
 			margin: auto;
+			max-width: 100%;
+			user-select: none;
 		}
 		#alias {
 			font-weight: bold;
