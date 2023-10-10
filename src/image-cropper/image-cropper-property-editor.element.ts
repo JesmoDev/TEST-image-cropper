@@ -35,87 +35,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 		this.requestUpdate();
 	}
 
-	#value?: UmbImageCropperPropertyEditorValue = {
-		focalPoint: { left: 0.5, top: 0.5 },
-		src: 'src/assets/TEST 4.png',
-		crops: [
-			{
-				alias: 'Almost Bot Left',
-				width: 1000,
-				height: 1000,
-				coordinates: {
-					x1: 0.04113924050632909,
-					x2: 0.3120537974683548,
-					y1: 0.32154746835443077,
-					y2: 0.031645569620253146,
-				},
-			},
-			{
-				alias: 'Test',
-				width: 1000,
-				height: 1000,
-				coordinates: {
-					x1: 0.3086962025316458,
-					x2: 0.04449683544303807,
-					y1: 0.04746835443037985,
-					y2: 0.305724683544304,
-				},
-			},
-			{
-				alias: 'Test2',
-				width: 1000,
-				height: 1000,
-				coordinates: {
-					x1: 0.3531930379746837,
-					x2: 0,
-					y1: 0,
-					y2: 0.3531930379746837,
-				},
-			},
-			{
-				alias: 'TopLeft',
-				width: 1000,
-				height: 1000,
-				coordinates: {
-					x1: 0,
-					x2: 0.5,
-					y1: 0,
-					y2: 0.5,
-				},
-			},
-			{
-				alias: 'bottomRight',
-				width: 1000,
-				height: 1000,
-				coordinates: {
-					x1: 0.5,
-					x2: 0,
-					y1: 0.5,
-					y2: 0,
-				},
-			},
-			{
-				alias: 'Desktop',
-				width: 1920,
-				height: 1080,
-			},
-			{
-				alias: 'Banner',
-				width: 1920,
-				height: 300,
-			},
-			{
-				alias: 'Tablet',
-				width: 600,
-				height: 800,
-			},
-			{
-				alias: 'Mobile',
-				width: 400,
-				height: 800,
-			},
-		],
-	};
+	#value?: UmbImageCropperPropertyEditorValue;
 
 	@state()
 	currentCrop?: UmbImageCropperCrop;
@@ -128,13 +48,6 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
 	@state()
 	src = '';
-
-	constructor() {
-		super();
-
-		//TODO: Remove this
-		this.value = this.#value;
-	}
 
 	async #onCropClick(crop: any) {
 		const index = this.crops.findIndex((c) => c.alias === crop.alias);
@@ -149,7 +62,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 		this.requestUpdate();
 	}
 
-	async #onCropChange(event: CustomEvent) {
+	#onCropChange(event: CustomEvent) {
 		const target = event.target as UmbImageCropperElement;
 		const value = target.value;
 
@@ -162,12 +75,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 		this.crops[index] = value;
 		this.currentCrop = undefined;
 
-		//TODO WHY DO I HAVE TO DO THIS TO MAKE LIT UPDATE THE DOM??
-		const temp = this.crops;
-		this.crops = [];
 		this.requestUpdate();
-		await this.updateComplete;
-		this.crops = temp;
 	}
 
 	#onFocalPointChange(event: CustomEvent) {
@@ -218,7 +126,7 @@ export class UmbImageCropperPropertyEditorElement extends LitElement {
 
 		return repeat(
 			this.crops,
-			(crop) => crop.alias,
+			(crop) => crop.alias + JSON.stringify(crop.coordinates),
 			(crop) =>
 				html` <umb-image-cropper-preview
 					@click=${() => this.#onCropClick(crop)}
