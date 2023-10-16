@@ -1,7 +1,7 @@
 import { LitElement, css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import './image-cropper/image-cropper-property-editor.element';
+import './image-cropper/input-image-cropper.element';
 
 /**
  * An example element.
@@ -147,6 +147,7 @@ export class AppElement extends LitElement {
 	static styles = css`
 		:host {
 			display: flex;
+			box-sizing: border-box;
 			color: #1f1f1f;
 			padding: 32px;
 			box-sizing: border-box;
